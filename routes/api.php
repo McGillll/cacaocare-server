@@ -44,3 +44,5 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('cacao/heatmap/{filter}/{date}', [CacaoController::class, 'getHeatMapData']);
 });
 
+//
+

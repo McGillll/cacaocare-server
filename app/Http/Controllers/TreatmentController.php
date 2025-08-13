@@ -6,6 +6,7 @@ use App\Models\Treatment;
 use App\Http\Requests\StoreTreatmentRequest;
 use App\Http\Requests\UpdateTreatmentRequest;
 use App\Models\TreatmentKeyPoint;
+use Illuminate\Support\Facades\DB;
 
 class TreatmentController
 {
@@ -27,31 +28,44 @@ class TreatmentController
      */
     public function store(StoreTreatmentRequest $request)
     {
-        $treatment = new Treatment();
-        $treatment->disease = $request->disease;
-        $treatment->short_description = $request->short_description;
-        $treatment->img_url = $request->img_url;
+        DB::beginTransaction();
 
-        $treatment->save();
+        try {
+            $treatment = new Treatment();
+            $treatment->disease = $request->disease;
+            $treatment->short_description = $request->short_description;
+            $treatment->img_url = $request->img_url;
+            $treatment->save();
 
-        $keys = $request->keypoints;
+            $keys = $request->keypoints;
 
-        for($i = 0; $i < count($keys); $i++ ){
-            $treatement_key_point = new TreatmentKeyPoint();
-            $treatement_key_point->disease_id = $treatment->id;
-            $treatement_key_point->title = $keys[$i]['title'];
-            $treatement_key_point->detailed_step = $keys[$i]['detailed_step'];
+            foreach ($keys as $key) {
+                $treatment_key_point = new TreatmentKeyPoint();
+                $treatment_key_point->disease_id = $treatment->id;
+                $treatment_key_point->title = $key['title'];
+                $treatment_key_point->detailed_step = $key['detailed_step'];
+                $treatment_key_point->save();
+            }
 
-            $treatement_key_point->save();
+            DB::commit();
+
+            return response()->json([
+                'data' => [
+                    'keypoints' => $keys,
+                    'treatment' => $treatment
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'error' => 'Failed to store treatment data.',
+                'message' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'data'=> [
-                'keypoints' => $keys,
-                'treatment' => $treatment
-            ]
-        ],200);
     }
+
 
     /**
      * Display the specified resource.
