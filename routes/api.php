@@ -18,7 +18,6 @@ Route::middleware(['auth:sanctum'])->group(function(){
         'cacao' => CacaoController::class,
         'user' => UserController::class,
         'download_link' =>DownloadLinksController::class,
-        'treatment' => TreatmentController::class
     ]);
 
     //User
@@ -44,5 +43,6 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('cacao/heatmap/{filter}/{date}', [CacaoController::class, 'getHeatMapData']);
 });
 
-//
+//Treatment
+Route::post('treatment', [TreatmentController::class, 'store']);
 
