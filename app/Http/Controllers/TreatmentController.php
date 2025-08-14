@@ -78,9 +78,52 @@ class TreatmentController
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTreatmentRequest $request, Treatment $treatment)
+    public function update(UpdateTreatmentRequest $request, int $id)
     {
+        DB::beginTransaction();
+        try {
+            $treatment = Treatment::find($id);
+            if($request->disease){
+                $treatment->disease = $request->disease;
+            }
+            if($request->short_description){
+                $treatment->short_description = $request->short_description;
+            }
+            if($request->img_url){
+                $treatment->img_url = $request->img_url;
+            }
+            $treatment->save();
 
+            if($request->keypoints){
+                $keys = $request->keypoints;
+                $treatment->keypoints()->delete();
+
+                foreach ($keys as $key) {
+                    $treatment_key_point = new TreatmentKeyPoint();
+                    $treatment_key_point->disease_id = $treatment->id;
+                    $treatment_key_point->title = $key['title'];
+                    $treatment_key_point->detailed_step = $key['detailed_step'];
+                    $treatment_key_point->save();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'data' => [
+                    'keypoints' => $keys,
+                    'treatment' => $treatment
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'error' => 'Failed to store treatment data.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
