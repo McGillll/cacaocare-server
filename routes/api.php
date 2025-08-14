@@ -43,6 +43,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('cacao/heatmap/{filter}/{date}', [CacaoController::class, 'getHeatMapData']);
 
     //Treatment
+    Route::get('treatment', [TreatmentController::class, 'index']);
     Route::post('treatment', [TreatmentController::class, 'store']);
     Route::put('treatment/{id}', [TreatmentController::class, 'update']);
 });
