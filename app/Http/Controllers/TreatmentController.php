@@ -94,15 +94,24 @@ class TreatmentController
             $treatment->save();
 
             if($request->keypoints){
-                $keys = $request->keypoints;
+                // Parse keypoints if it's a JSON string from FormData
+                $keypoints_data = $request->keypoints;
+                if (is_string($keypoints_data)) {
+                    $keys = json_decode($keypoints_data, true);
+                } else {
+                    $keys = $keypoints_data;
+                }
+                
                 $treatment->keypoints()->delete();
 
-                foreach ($keys as $key) {
-                    $treatment_key_point = new TreatmentKeyPoint();
-                    $treatment_key_point->disease_id = $treatment->id;
-                    $treatment_key_point->title = $key['title'];
-                    $treatment_key_point->detailed_step = $key['detailed_step'];
-                    $treatment_key_point->save();
+                if (is_array($keys)) {
+                    foreach ($keys as $key) {
+                        $treatment_key_point = new TreatmentKeyPoint();
+                        $treatment_key_point->disease_id = $treatment->id;
+                        $treatment_key_point->title = $key['title'];
+                        $treatment_key_point->detailed_step = $key['detailed_step'];
+                        $treatment_key_point->save();
+                    }
                 }
             }
 
