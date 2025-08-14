@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             DownloadLinksSeeder::class,
-            CacaoSeeder::class
+            // CacaoSeeder::class
         ]);
 }
 }

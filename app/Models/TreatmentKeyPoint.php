@@ -16,4 +16,8 @@ class TreatmentKeyPoint extends Model
         'title',
         'detailed_step'
     ];
+
+    public function treatment(){
+        return $this->belongsTo(Treatment::class, 'disease_id');
+    }
 }

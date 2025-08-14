@@ -22,7 +22,7 @@ class CacaoController
         $cacao->uploaderId = $cacaoData['uploaderId'];
 
         if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('cacao-photos');
+            $photoPath = $request->file('photo')->store('cacao-photos/'.$cacao->label);
             $cacao->photo = "https://cacaocare.s3.ap-southeast-2.amazonaws.com/" . $photoPath;
         }
         $cacao->save();
