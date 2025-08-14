@@ -82,6 +82,12 @@ class TreatmentController
         DB::beginTransaction();
         try {
             $treatment = Treatment::find($id);
+            if(!$treatment) {
+                return response()->json([
+                    'error' => 'Treatment not found.'
+                ], 404);
+            }
+            
             if($request->disease){
                 $treatment->disease = $request->disease;
             }
@@ -93,45 +99,52 @@ class TreatmentController
             }
             $treatment->save();
 
+            $keys = [];
             if($request->keypoints){
                 // Parse keypoints if it's a JSON string from FormData
                 $keypoints_data = $request->keypoints;
                 if (is_string($keypoints_data)) {
                     $keys = json_decode($keypoints_data, true);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        throw new \Exception('Invalid JSON format for keypoints');
+                    }
                 } else {
                     $keys = $keypoints_data;
                 }
                 
+                // Delete existing keypoints
                 $treatment->keypoints()->delete();
 
-                if (is_array($keys)) {
+                // Add new keypoints if they exist and are valid
+                if (is_array($keys) && !empty($keys)) {
                     foreach ($keys as $key) {
-                        $treatment_key_point = new TreatmentKeyPoint();
-                        $treatment_key_point->disease_id = $treatment->id;
-                        $treatment_key_point->title = $key['title'];
-                        $treatment_key_point->detailed_step = $key['detailed_step'];
-                        $treatment_key_point->save();
+                        if (isset($key['title']) && isset($key['detailed_step'])) {
+                            $treatment_key_point = new TreatmentKeyPoint();
+                            $treatment_key_point->disease_id = $treatment->id;
+                            $treatment_key_point->title = $key['title'];
+                            $treatment_key_point->detailed_step = $key['detailed_step'];
+                            $treatment_key_point->save();
+                        }
                     }
                 }
             }
 
+            // Reload treatment with keypoints
+            $treatment->load('keypoints');
+            
             DB::commit();
 
             return response()->json([
-                'data' => [
-                    'keypoints' => $keys,
-                    'treatment' => $treatment
-                ]
+                'message' => 'Treatment updated successfully.',
+                'data' => $treatment
             ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return response()->json([
-                'error' => 'Failed to store treatment data.',
-                'message' => $e->getMessage(),
-                'data' => $request->keypoints
-
+                'error' => 'Failed to update treatment data.',
+                'message' => $e->getMessage()
             ], 500);
         }
     }
