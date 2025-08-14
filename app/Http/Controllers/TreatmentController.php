@@ -28,44 +28,46 @@ class TreatmentController
      */
     public function store(StoreTreatmentRequest $request)
     {
-        DB::beginTransaction();
+        // DB::beginTransaction();
+        // try {
+        //     $treatment = new Treatment();
+        //     $treatment->disease = $request->disease;
+        //     $treatment->short_description = $request->short_description;
+        //     $treatment->img_url = $request->img_url;
+        //     $treatment->save();
 
-        try {
-            $treatment = new Treatment();
-            $treatment->disease = $request->disease;
-            $treatment->short_description = $request->short_description;
-            $treatment->img_url = $request->img_url;
-            $treatment->save();
+        //     if($request->keypoints){
+        //         $keys = $request->keypoints;
 
-            if($request->keypoints){
-                $keys = $request->keypoints;
+        //         foreach ($keys as $key) {
+        //             $treatment_key_point = new TreatmentKeyPoint();
+        //             $treatment_key_point->disease_id = $treatment->id;
+        //             $treatment_key_point->title = $key['title'];
+        //             $treatment_key_point->detailed_step = $key['detailed_step'];
+        //             $treatment_key_point->save();
+        //         }
+        //     }
+        //     DB::commit();
+        //     return response()->json([
+        //         'data' => [
+        //             'keypoints' => $keys,
+        //             'treatment' => $treatment
+        //         ]
+        //     ], 200);
 
-                foreach ($keys as $key) {
-                    $treatment_key_point = new TreatmentKeyPoint();
-                    $treatment_key_point->disease_id = $treatment->id;
-                    $treatment_key_point->title = $key['title'];
-                    $treatment_key_point->detailed_step = $key['detailed_step'];
-                    $treatment_key_point->save();
-                }
-            }
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
 
-            DB::commit();
+        //     return response()->json([
+        //         'error' => 'Failed to store treatment data.',
+        //         'message' => $e->getMessage()
+        //     ], 500);
+        // }
+        return response()->json([
+            'data' => $request->keypoints,
+            'message' => 'hello'
 
-            return response()->json([
-                'data' => [
-                    'keypoints' => $keys,
-                    'treatment' => $treatment
-                ]
-            ], 200);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'error' => 'Failed to store treatment data.',
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        ]);
     }
 
 
