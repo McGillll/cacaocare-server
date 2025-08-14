@@ -37,14 +37,16 @@ class TreatmentController
             $treatment->img_url = $request->img_url;
             $treatment->save();
 
-            $keys = $request->keypoints;
+            if($request->keypoints){
+                $keys = $request->keypoints;
 
-            foreach ($keys as $key) {
-                $treatment_key_point = new TreatmentKeyPoint();
-                $treatment_key_point->disease_id = $treatment->id;
-                $treatment_key_point->title = $key['title'];
-                $treatment_key_point->detailed_step = $key['detailed_step'];
-                $treatment_key_point->save();
+                foreach ($keys as $key) {
+                    $treatment_key_point = new TreatmentKeyPoint();
+                    $treatment_key_point->disease_id = $treatment->id;
+                    $treatment_key_point->title = $key['title'];
+                    $treatment_key_point->detailed_step = $key['detailed_step'];
+                    $treatment_key_point->save();
+                }
             }
 
             DB::commit();
