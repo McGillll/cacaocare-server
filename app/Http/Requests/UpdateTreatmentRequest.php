@@ -25,7 +25,7 @@ class UpdateTreatmentRequest extends FormRequest
             'disease' => 'sometimes|string|max:255',
             'short_description' => 'sometimes|string',
             'img_url' => 'sometimes|url',
-            'keypoints' => 'sometimes|string' // JSON string when sent via FormData
+            'keypoints' => 'sometimes' // JSON string when sent via FormData
         ];
     }
 }

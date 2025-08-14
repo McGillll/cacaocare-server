@@ -87,7 +87,7 @@ class TreatmentController
                     'error' => 'Treatment not found.'
                 ], 404);
             }
-            
+
             if($request->disease){
                 $treatment->disease = $request->disease;
             }
@@ -111,7 +111,7 @@ class TreatmentController
                 } else {
                     $keys = $keypoints_data;
                 }
-                
+
                 // Delete existing keypoints
                 $treatment->keypoints()->delete();
 
@@ -131,7 +131,7 @@ class TreatmentController
 
             // Reload treatment with keypoints
             $treatment->load('keypoints');
-            
+
             DB::commit();
 
             return response()->json([
