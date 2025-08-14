@@ -18,6 +18,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
         'cacao' => CacaoController::class,
         'user' => UserController::class,
         'download_link' =>DownloadLinksController::class,
+        'treatment' => TreatmentController::class
     ]);
 
     //User
@@ -42,9 +43,6 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('cacao/feed/{order}/{filter}', [CacaoController::class, 'index']);
     Route::get('cacao/heatmap/{filter}/{date}', [CacaoController::class, 'getHeatMapData']);
 
-    //Treatment
-    Route::get('treatment', [TreatmentController::class, 'index']);
-    Route::post('treatment', [TreatmentController::class, 'store']);
-    Route::put('treatment/{id}', [TreatmentController::class, 'update']);
+
 });
 
