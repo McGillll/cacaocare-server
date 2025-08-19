@@ -33,16 +33,15 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('download/latest/date', [DownloadLinksController::class, 'getLatestDate']);
 
     //Cacao
-    Route::get('cacao/upload/today', [CacaoController::class, 'getUploadedTodayCount']);
     Route::get('cacao/recent/upload', [CacaoController::class, 'getRecent']);
     Route::get('cacao/status/count', [CacaoController::class, 'getStatusCount']);
-    Route::get('cacao/disease/weeks', [CacaoController::class, 'getHighestDiseaseWithinTheWeek']);
-    Route::get('cacao/upload/count/{id}', [CacaoController::class, 'getUploadCountByUser']);
-    Route::get('cacao/upload/trend', [CacaoController::class, 'getUploadCountByDate']);
-    Route::get('cacao/user/upload/{id}', [CacaoController::class, 'getCacaoUploadedByUser']);
     Route::get('cacao/feed/{order}/{filter}', [CacaoController::class, 'index']);
+    Route::get('cacao/upload/trend', [CacaoController::class, 'getUploadCountByDate']);
+    Route::get('cacao/upload/today', [CacaoController::class, 'getUploadedTodayCount']);
     Route::get('cacao/heatmap/{filter}/{date}', [CacaoController::class, 'getHeatMapData']);
-
+    Route::get('cacao/upload/count/{id}', [CacaoController::class, 'getUploadCountByUser']);
+    Route::get('cacao/user/upload/{id}', [CacaoController::class, 'getCacaoUploadedByUser']);
+    Route::get('cacao/disease/weeks', [CacaoController::class, 'getHighestDiseaseWithinTheWeek']);
 
 });
 

@@ -174,23 +174,44 @@ class CacaoController
     }
     //Get uploaded count by the user
     public function getUploadCountByDate() {
-        $month = Carbon::now()->month;
-        $year = Carbon::now()->year;
+        // Initialize arrays to store counts for each month
+        $blackpodCounts = [];
+        $frostypodCounts = [];
 
-        $baseQuery = Cacao::whereYear('created_at', '=', $year)
-            ->whereMonth('created_at', '=', $month);
+        // Get the current date
+        $currentDate = Carbon::now();
 
-        $blackpodrot = (clone $baseQuery)->where('label', 'Black Pod Rot')->count();
-        $frostypodrot = (clone $baseQuery)->where('label', 'Frosty Pod Rot')->count();
-        $total = (clone $baseQuery)->count();
+        // Loop through the last 5 months (current month + 4 previous months)
+        for ($i = 4; $i >= 0; $i--) {
+            $targetDate = $currentDate->copy()->subMonths($i);
+            $month = $targetDate->month;
+            $year = $targetDate->year;
+
+            // Count unique users who uploaded Black Pod Rot in this month
+            $blackpodCount = Cacao::where('label', 'Black Pod Rot')
+                ->whereYear('created_at', '=', $year)
+                ->whereMonth('created_at', '=', $month)
+                ->distinct('uploaderId')
+                ->count('uploaderId');
+
+            // Count unique users who uploaded Frosty Pod Rot in this month
+            $frostypodCount = Cacao::where('label', 'Frosty Pod Rot')
+                ->whereYear('created_at', '=', $year)
+                ->whereMonth('created_at', '=', $month)
+                ->distinct('uploaderId')
+                ->count('uploaderId');
+
+            // Add counts to arrays (in ascending order by month)
+            $blackpodCounts[] = $blackpodCount;
+            $frostypodCounts[] = $frostypodCount;
+        }
 
         return response()->json([
-            'data' => [
-                'blackpod' => $blackpodrot,
-                'frostypod' => $frostypodrot,
-                'total' => $total
+            "data" => [
+                'blackpod' => $blackpodCounts,
+                'frostypod' => $frostypodCounts
             ]
-        ],200);
+        ], 200);
     }
 
     //Get Heatmap Data

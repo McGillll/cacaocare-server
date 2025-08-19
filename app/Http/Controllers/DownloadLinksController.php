@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DownloadLinksStoreRequest;
 use App\Http\Requests\DownloadLinksUpdateRequest;
 use App\Models\DownloadLinks;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class DownloadLinksController
@@ -65,16 +66,50 @@ class DownloadLinksController
     /**
      * Update the specified resource in storage.
      */
-    public function update(DownloadLinksUpdateRequest $request, DownloadLinks $downloadLinks)
+    public function update(DownloadLinksUpdateRequest $request, int $id)
     {
-        //
+        $downloadLink = DownloadLinks::find($id);
+        if(!$downloadLink){
+            return response()->json([
+                'error' => true,
+                'message' => 'Data not found'
+            ], 404);
+        }
+
+        if($request->download_link){
+            $downloadLink->download_link = $request->download_link;
+        }
+        if($request->version){
+            $downloadLink->version = $request->version;
+        }
+        if($request->description){
+            $downloadLink->description = $request->description;
+        }
+
+        $downloadLink->save();
+
+        return response()->json([
+            'data' => $downloadLink
+        ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DownloadLinks $downloadLinks)
+    public function destroy(int $id)
     {
-        //
+            $download_link = DownloadLinks::find($id);
+            if(!$download_link){
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Data not found'
+                ], 404);
+            }
+            $result = $download_link->delete();
+
+            return response()->json([
+                'data' => $result,
+                'message' => "Data deleted successfully"
+            ], 200);
     }
 }
