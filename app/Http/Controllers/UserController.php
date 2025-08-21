@@ -79,8 +79,11 @@ class UserController
             return response()->json(['message' => 'Token expired, please login again'], 401);
         }
 
+        $total_post = $user->cacaos()->count();
+
         return response()->json([
-            'data' => $user
+            'data' => $user,
+            'total_posts' => $total_post
         ], 200);
     }
 
