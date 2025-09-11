@@ -9,7 +9,7 @@ class RegionAlertTableDataService
     public function years()
     {
         return DB::table('cacaos')
-            ->select(DB::raw("DATE_FORMAT('%Y', created_at) as year"))
+            ->selectRaw("DATE_FORMAT(created_at, '%Y') as year")
             ->distinct()
             ->orderBy('year', 'desc')
             ->pluck('year');
@@ -57,7 +57,7 @@ class RegionAlertTableDataService
         $query = DB::table('cacaos')
             ->select([
                 'uploaderId',
-                DB::raw("DATE_FORMAT('%Y', created_at) as year"),
+                DB::raw("DATE_FORMAT(created_at, '%Y') as year"),
             ])
             ->whereIn('label', ['Frosty Pod Rot', 'Black Pod Rot'])
             ->where('year', $date);
