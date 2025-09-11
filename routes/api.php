@@ -36,9 +36,12 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('cacao/recent/upload', [CacaoController::class, 'getRecent']);
     Route::get('cacao/status/count', [CacaoController::class, 'getStatusCount']);
     Route::get('cacao/feed/{order}/{filter}', [CacaoController::class, 'index']);
-    Route::get('cacao/upload/trend', [CacaoController::class, 'getUploadCountByDate']);
     Route::get('cacao/upload/today', [CacaoController::class, 'getUploadedTodayCount']);
     Route::get('cacao/upload/years/option', [CacaoController::class, 'uploadYears']);
+
+    //Graph
+    Route::get('cacao/graph/yearly', [CacaoController::class, 'getCacaoYearGraph']);
+    Route::get('cacao/upload/trend', [CacaoController::class, 'getUploadCountByDate']);
 
     //Heatmap
     Route::get('cacao/heatmap/{filter}', [CacaoController::class, 'getWeeklyHeatMapData']);

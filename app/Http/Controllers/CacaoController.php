@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cacao;
 use App\Services\CacaoHeatmapService;
+use App\Services\CacaoYearGraphService;
 use App\Services\RegionAlertTableDataService;
 use App\Services\WeeklyCacaoHeatmapService;
 use DB;
@@ -269,6 +270,28 @@ class CacaoController
             ]
         ], 200);
     }
+
+    public function getCacaoYearGraph(Request $request, CacaoYearGraphService $cacaoYearGraphService)
+    {
+        // 1. Get year (default to current) and optional filters
+        $year   = (int) $request->query('year', Carbon::now()->year);
+        $region = $request->query('region');
+        $city   = $request->query('city');
+
+        // 2. Prepare result arrays
+        $blackpodCounts  = $cacaoYearGraphService->getYearlyBlackpodData((string)$year, $region, $city);
+        $frostypodCounts = $cacaoYearGraphService->getYearlyFrostypodData((string)$year, $region, $city);
+
+
+        // 4. Return JSON
+        return response()->json([
+            'data' => [
+                'blackpod'  => $blackpodCounts,
+                'frostypod' => $frostypodCounts,
+            ],
+        ], 200);
+    }
+
 
     public function uploadYears(RegionAlertTableDataService $regionAlertTableDataService){
         $years = $regionAlertTableDataService->years();
