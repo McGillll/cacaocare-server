@@ -8,8 +8,14 @@ use Illuminate\Support\Facades\DB;
 
 class CacaoHeatmapService
 {
-    private $startOfWeek = Carbon::now()->startOfWeek();
-    private $endOfWeek = Carbon::now()->endOfWeek();
+    private $startOfWeek;
+    private $endOfWeek;
+
+    public function __construct()
+    {
+        $this->startOfWeek = Carbon::now()->startOfWeek();
+        $this->endOfWeek   = Carbon::now()->endOfWeek();
+    }
 
     public function result(array $status){
         $subQuery = $this->initquery($status);
