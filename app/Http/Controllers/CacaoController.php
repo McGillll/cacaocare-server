@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Cacao;
 use App\Services\CacaoHeatmapService;
+use App\Services\RegionAlertTableDataService;
+use App\Services\WeeklyCacaoHeatmapService;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -216,7 +218,7 @@ class CacaoController
     }
 
     //Get Heatmap Data
-    public function getWeeklyHeatMapData(string $filter, CacaoHeatmapService $cacaoHeatmapService){
+    public function getWeeklyHeatMapData(string $filter, WeeklyCacaoHeatmapService $cacaoHeatmapService){
 
         $status = ['Black Pod Rot', 'Frosty Pod Rot'];
         switch (strtoupper($filter)) {
@@ -238,6 +240,55 @@ class CacaoController
             'data' => [
                 'uploaded' => $result,
                 'total' => $totalCount
+            ]
+        ], 200);
+    }
+
+    public function getCacaoHeatMapData(string $filter, string $date , CacaoHeatmapService $cacaoHeatmapService){
+
+        $status = ['Black Pod Rot', 'Frosty Pod Rot'];
+        switch (strtoupper($filter)) {
+            case 'BLACK POD ROT':
+                $status = ['Black Pod Rot'];
+                break;
+            case 'FROSTY POD ROT':
+                $status = ['Frosty Pod Rot'];
+                break;
+            default:
+                $status = ['Black Pod Rot', 'Frosty Pod Rot'];
+                break;
+        }
+
+        $result = $cacaoHeatmapService->result($status, $date);
+        $totalCount = $cacaoHeatmapService->totalCount($status, $date);
+
+        return response()->json([
+            'data' => [
+                'uploaded' => $result,
+                'total' => $totalCount
+            ]
+        ], 200);
+    }
+
+    public function regionAlertData(string $year, CacaoHeatmapService $cacaoHeatmapService, RegionAlertTableDataService $regionAlertTableDataService)
+    {
+        $region = $regionAlertTableDataService->result($year);
+        $totalCount = $regionAlertTableDataService->totalCount($year);
+        $totalCity = $regionAlertTableDataService->totalCity($year);
+        $totalBlackPod = $cacaoHeatmapService->totalCount(['Black Pod Rot'], $year);
+        $totalFrostyPod = $cacaoHeatmapService->totalCount(['Frosty Pod Rot'], $year);
+        $totalDiseased = $totalBlackPod + $totalFrostyPod;
+        $years = $regionAlertTableDataService->years();
+
+        return response()->json([
+            'data' => [
+                'uploaded' => $region,
+                'total_users' => $totalCount,
+                'total_blackpod_uploads' => $totalBlackPod,
+                'total_frostypod_uploads' => $totalFrostyPod,
+                'total_diseased_uploads' => $totalDiseased,
+                "total_city" => $totalCity,
+                'years' => $years
             ]
         ], 200);
     }

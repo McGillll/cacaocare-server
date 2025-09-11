@@ -1,26 +1,18 @@
 <?php
-
 namespace App\Services;
 
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+
 
 class CacaoHeatmapService
 {
-    private $startOfWeek;
-    private $endOfWeek;
 
-    public function __construct()
+    public function result(array $status, string $date)
     {
-        $this->startOfWeek = Carbon::now()->startOfWeek();
-        $this->endOfWeek   = Carbon::now()->endOfWeek();
-    }
+        $subQuery = $this->initQuery($status, $date);
 
-    public function result(array $status){
-        $subQuery = $this->initquery($status);
-
-        $result = DB::table(DB::raw("({$subQuery->toSql()}) as cacaos"))
+        return DB::table(DB::raw("({$subQuery->toSql()}) as cacaos"))
             ->mergeBindings($subQuery)
             ->join('users', 'users.id', '=', 'cacaos.uploaderId')
             ->select(
@@ -31,33 +23,28 @@ class CacaoHeatmapService
             )
             ->groupBy('users.city', 'users.barangay', 'users.region')
             ->get();
-
-        return $result;
     }
 
-    public function totalCount(array $status){
-        $subQuery = $this->initquery($status);
+    public function totalCount(array $status, string $date)
+    {
+        $subQuery = $this->initQuery($status, $date);
 
-        $totalCount = DB::table(DB::raw("({$subQuery->toSql()}) as weekly_uploads"))
-        ->mergeBindings($subQuery)
-        ->count();
-
-        return $totalCount;
+        return DB::table(DB::raw("({$subQuery->toSql()}) as weekly_uploads"))
+            ->mergeBindings($subQuery)
+            ->count();
     }
 
-    private function initquery(array $status):Builder{
-        $subQuery = DB::table('cacaos')
-        ->select(
-            'uploaderId',
-            DB::raw("DATE_FORMAT(created_at, '%Y-%v') as year_week")
-        )
-        ->whereIn('label', $status)
-        ->whereBetween('created_at', [
-            $this->startOfWeek->toDateTimeString(),
-            $this->endOfWeek->toDateTimeString(),
-        ])
-        ->groupBy('uploaderId', 'year_week');
+    private function initQuery(array $status, string $date): Builder
+    {
+        $q = DB::table('cacaos')
+            ->select(
+                'uploaderId',
+                DB::raw("DATE_FORMAT(created_at, '%Y') as year")
+            )
+            ->whereIn('label', $status)
+            ->where('year', $date);;
 
-        return $subQuery;
+        return $q->groupBy('uploaderId', 'year');
     }
+
 }
