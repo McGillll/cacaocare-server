@@ -49,16 +49,19 @@ class CacaoYearGraphService
 
     /**
      * Shared base query builder for a given year, month, region, and city.
+     * Joins with User table to filter by region and city since these columns
+     * are in the User table, not directly in the Cacao table.
      */
     private function baseQuery(
         string $year,
         int    $month,
-        ?string $region = null,
-        ?string $city   = null
+        ?string $region,
+        ?string $city
     ): Builder {
-        return Cacao::whereYear('created_at', "=", $year)
-            ->whereMonth('created_at', "=", $month)
-            ->when($region, fn($q, $r) => $q->where('region', $r))
-            ->when($city,   fn($q, $c) => $q->where('city',   $c));
+        return Cacao::join('users', 'users.id', '=', 'cacaos.uploaderId')
+            ->whereYear('cacaos.created_at', "=", $year)
+            ->whereMonth('cacaos.created_at', "=", $month)
+            ->when($region, fn($q, $r) => $q->where('users.region', $r))
+            ->when($city,   fn($q, $c) => $q->where('users.city',   $c));
     }
 }

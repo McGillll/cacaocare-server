@@ -274,9 +274,9 @@ class CacaoController
     public function getCacaoYearGraph(Request $request, CacaoYearGraphService $cacaoYearGraphService)
     {
         // 1. Get year (default to current) and optional filters
-        $year   = (int) $request->query('year', Carbon::now()->year);
-        $region = $request->query('region');
-        $city   = $request->query('city');
+        $year   = (int) $request->input('year', Carbon::now()->year);
+        $region = $request->input('region', null);
+        $city   = $request->input('city', null);
 
         // 2. Prepare result arrays
         $blackpodCounts  = $cacaoYearGraphService->getYearlyBlackpodData((string)$year, $region, $city);
