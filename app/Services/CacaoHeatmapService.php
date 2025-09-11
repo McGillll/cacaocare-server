@@ -34,17 +34,13 @@ class CacaoHeatmapService
             ->count();
     }
 
-    private function initQuery(array $status, string $date): Builder
+    private function initQuery(array $status, string $year): Builder
     {
-        $q = DB::table('cacaos')
-            ->select(
-                'uploaderId',
-                DB::raw("DATE_FORMAT(created_at, '%Y') as year")
-            )
+        return DB::table('cacaos')
+            ->selectRaw("YEAR(created_at) as year, uploaderId")
             ->whereIn('label', $status)
-            ->where('created_at', $date);;
-
-        return $q->groupBy('uploaderId', 'year');
+            ->whereYear('created_at', $year)
+            ->groupBy('uploaderId', 'year');
     }
 
 }
