@@ -38,6 +38,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('cacao/feed/{order}/{filter}', [CacaoController::class, 'index']);
     Route::get('cacao/upload/trend', [CacaoController::class, 'getUploadCountByDate']);
     Route::get('cacao/upload/today', [CacaoController::class, 'getUploadedTodayCount']);
+    Route::get('cacao/upload/years', [CacaoController::class, 'uploadYears']);
 
     //Heatmap
     Route::get('cacao/heatmap/{filter}', [CacaoController::class, 'getWeeklyHeatMapData']);

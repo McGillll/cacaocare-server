@@ -270,6 +270,13 @@ class CacaoController
         ], 200);
     }
 
+    public function uploadYears(RegionAlertTableDataService $regionAlertTableDataService){
+        $years = $regionAlertTableDataService->years();
+        return response()->json([
+            'data' => $years
+        ], 200);
+    }
+
     public function regionAlertData(string $year, CacaoHeatmapService $cacaoHeatmapService, RegionAlertTableDataService $regionAlertTableDataService)
     {
         $region = $regionAlertTableDataService->result($year);
@@ -278,7 +285,6 @@ class CacaoController
         $totalBlackPod = $cacaoHeatmapService->totalCount(['Black Pod Rot'], $year);
         $totalFrostyPod = $cacaoHeatmapService->totalCount(['Frosty Pod Rot'], $year);
         $totalDiseased = $totalBlackPod + $totalFrostyPod;
-        $years = $regionAlertTableDataService->years();
 
         return response()->json([
             'data' => [
@@ -288,7 +294,6 @@ class CacaoController
                 'total_frostypod_uploads' => $totalFrostyPod,
                 'total_diseased_uploads' => $totalDiseased,
                 "total_city" => $totalCity,
-                'years' => $years
             ]
         ], 200);
     }
