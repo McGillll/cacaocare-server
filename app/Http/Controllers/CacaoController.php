@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cacao;
+use App\Services\CacaoHeatmapService;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -215,37 +216,23 @@ class CacaoController
     }
 
     //Get Heatmap Data
-    public function getHeatMapData(string $filter, string $date){
-        $date = explode('-', $date);
+    public function getWeeklyHeatMapData(string $filter, CacaoHeatmapService $cacaoHeatmapService){
+
         $status = ['Black Pod Rot', 'Frosty Pod Rot'];
-        switch(strtoupper($filter)){
-            case 'BLACK POD ROT': $status = ['Black Pod Rot'];
-            break;
-            case 'FROSTY POD ROT': $status = ['Frosty Pod Rot'];
-            break;
-            default : ['Black Pod Rot', 'Frosty Pod Rot'];
+        switch (strtoupper($filter)) {
+            case 'BLACK POD ROT':
+                $status = ['Black Pod Rot'];
+                break;
+            case 'FROSTY POD ROT':
+                $status = ['Frosty Pod Rot'];
+                break;
+            default:
+                $status = ['Black Pod Rot', 'Frosty Pod Rot'];
+                break;
         }
 
-        $subQuery = DB::table('cacaos')
-            ->select(
-                'uploaderId',
-                DB::raw("DATE_FORMAT(created_at, '%Y-%v') as year_week")
-            )
-            ->whereIn('label', $status)
-            ->whereYear('created_at', $date[0])
-            ->whereMonth('created_at', $date[1])
-            ->groupBy('uploaderId', 'year_week');
-
-        $result = DB::table(DB::raw("({$subQuery->toSql()}) as cacaos"))
-            ->mergeBindings($subQuery)
-            ->join('users', 'users.id', '=', 'cacaos.uploaderId')
-            ->select('users.city', 'users.barangay', 'users.region', DB::raw('COUNT(*) as count'))
-            ->groupBy('users.city', 'users.barangay', 'users.region')
-            ->get();
-
-        $totalCount = DB::table(DB::raw("({$subQuery->toSql()}) as weekly_uploads"))
-            ->mergeBindings($subQuery)
-            ->count();
+        $result = $cacaoHeatmapService->result($status);
+        $totalCount = $cacaoHeatmapService->totalCount($status);
 
         return response()->json([
             'data' => [
