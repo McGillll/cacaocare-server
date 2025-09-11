@@ -52,11 +52,11 @@ class RegionAlertTableDataService
     }
 
     // Your service methods here
-    private function initQuery(array $status, string $year): Builder
+    private function initQuery(string $year): Builder
     {
         return DB::table('cacaos')
             ->selectRaw("YEAR(created_at) as year, uploaderId")
-            ->whereIn('label', $status)
+            ->whereIn('label', ['Frosty Pod Rot', 'Black Pod Rot'])
             ->whereYear('created_at', $year)
             ->groupBy('uploaderId', 'year');
     }
