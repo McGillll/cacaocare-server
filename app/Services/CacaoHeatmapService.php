@@ -42,7 +42,7 @@ class CacaoHeatmapService
                 DB::raw("DATE_FORMAT(created_at, '%Y') as year")
             )
             ->whereIn('label', $status)
-            ->where('year', $date);;
+            ->where('created_at', $date);;
 
         return $q->groupBy('uploaderId', 'year');
     }

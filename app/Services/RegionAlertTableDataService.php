@@ -60,7 +60,7 @@ class RegionAlertTableDataService
                 DB::raw("DATE_FORMAT(created_at, '%Y') as year"),
             ])
             ->whereIn('label', ['Frosty Pod Rot', 'Black Pod Rot'])
-            ->where('year', $date);
+            ->where('created_at', $date);
 
         return $query->groupBy('uploaderId', 'year');
     }
