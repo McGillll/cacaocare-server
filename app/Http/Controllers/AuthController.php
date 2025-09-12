@@ -11,30 +11,50 @@ use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash as FacadesHash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class AuthController
 {
-    public function register(UserStoreRequest $request) {
-        $token = Str::random(40);
-        UserController::store($request);
+    public function register(UserStoreRequest $request)
+    {
+        DB::beginTransaction();
 
-        try{
+        try {
+            // Create user
+            UserController::store($request);
+
+            // Generate token
+            $token = Str::random(40);
+
+            // Insert email verification
             DB::table('email_verifications')->insert([
                 'email' => $request->email,
                 'token' => $token,
                 'created_at' => now(),
             ]);
-        }catch(Exception $e){
-            return redirect()->to('https://cacao-care.nuxt.dev/email-verified');
-        }
 
-        $url = url('/verify-email?token=' . $token);
-        Mail::to($request->email)->send(new VerificationEmail($url));
-        return response()->json([
-            'message' => 'Verification Send'
-        ],200);
+            // Send verification email
+            $url = url('/verify-email?token=' . $token);
+            Mail::to($request->email)->send(new VerificationEmail($url));
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Verification email sent'
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log the error for debugging
+
+            return response()->json([
+                'message' => 'Registration failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function sendVerification(Request $request) {
@@ -87,7 +107,7 @@ class AuthController
             ], 404);
         }
 
-        if (!Hash::check($request->password, $user->password)) {
+        if (!FacadesHash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid Password',
                 'errors' => [
