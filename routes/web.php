@@ -8,4 +8,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+Route::get('/verify-email', [AuthController::class, 'verifyEmail']);
