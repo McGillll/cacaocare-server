@@ -42,7 +42,8 @@ class AuthController
             DB::commit();
 
             return response()->json([
-                'message' => 'Verification email sent'
+                'message' => 'Verification email sent',
+                'status' => 200
             ], 200);
 
         } catch (\Exception $e) {
@@ -80,12 +81,14 @@ class AuthController
 
         if ($record) {
             DB::table('users')
-            ->where('email', $record->email)
-            ->update(['email_verified_at' => Carbon::now()]);
+                ->where('email', $record->email)
+                ->update(['email_verified_at' => Carbon::now()]);
             DB::table('email_verifications')->where('token', $token)->delete();
 
+            // Redirect to email-verified page
             return redirect()->to('https://cacao-care.nuxt.dev/email-verified');
         }
+        // Redirect to verify-failed page if token is invalid
         return redirect()->to('https://cacao-care.nuxt.dev/verify-failed');
     }
 
