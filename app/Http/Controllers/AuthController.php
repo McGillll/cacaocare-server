@@ -37,7 +37,7 @@ class AuthController
 
             // Send verification email
             $url = url('/verify-email?token=' . $token);
-            Mail::to($request->email)->send(new VerificationEmail($url));
+            Mail::to($request->email)->queue(new VerificationEmail($url));
 
             DB::commit();
 
@@ -70,7 +70,7 @@ class AuthController
         );
 
         $url = url('/verify-email?token=' . $token);
-        Mail::to($request->email)->send(new VerificationEmail($url));
+        Mail::to($request->email)->queue(new VerificationEmail($url));
 
         return response()->json(['data' => 'Verification email sent!'], 200);
     }
