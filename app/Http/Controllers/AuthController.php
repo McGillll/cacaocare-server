@@ -86,10 +86,10 @@ class AuthController
             DB::table('email_verifications')->where('token', $token)->delete();
 
             // Redirect to email-verified page
-            return response()->json("Email verified successfully",200);
+            return redirect()->to('https://cacao-care.nuxt.dev/email-verified');
         }
         // Redirect to verify-failed page if token is invalid
-        return response()->json("Verification failed",500);
+        return redirect()->to('https://cacao-care.nuxt.dev/verify-failed');
     }
 
     public function authLogin(Request $request)
