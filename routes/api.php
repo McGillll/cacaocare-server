@@ -11,6 +11,8 @@ Route::post('auth/login', [AuthController::class, 'authLogin']);
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/resend-verification', [AuthController::class, 'sendVerification']);
 Route::get('download/latest', [DownloadLinksController::class, 'getLatest']);
+Route::get('treatment', [TreatmentController::class, 'index'])->name('treatment.index');
+
 
 Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('auth/logout', [AuthController::class, 'authLogout']);
@@ -18,7 +20,6 @@ Route::middleware(['auth:sanctum'])->group(function(){
         'cacao' => CacaoController::class,
         'user' => UserController::class,
         'download_link' =>DownloadLinksController::class,
-        'treatment' => TreatmentController::class
     ]);
 
     //User
@@ -53,6 +54,12 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('cacao/upload/count/{id}', [CacaoController::class, 'getUploadCountByUser']);
     Route::get('cacao/user/upload/{id}', [CacaoController::class, 'getCacaoUploadedByUser']);
     Route::get('cacao/disease/weeks', [CacaoController::class, 'getHighestDiseaseWithinTheWeek']);
+
+    // Treatment routes
+    Route::post('treatment', [TreatmentController::class, 'store'])->name('treatment.store');
+    Route::get('treatment/{treatment}', [TreatmentController::class, 'show'])->name('treatment.show');
+    Route::put('treatment/{treatment}', [TreatmentController::class, 'update'])->name('treatment.update');
+    Route::delete('treatment/{treatment}', [TreatmentController::class, 'destroy'])->name('treatment.destroy');
 
 });
 
