@@ -7,59 +7,116 @@ use App\Http\Controllers\TreatmentController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('auth/login', [AuthController::class, 'authLogin']);
-Route::post('auth/register', [AuthController::class, 'register']);
-Route::post('auth/resend-verification', [AuthController::class, 'sendVerification']);
-Route::get('download/latest', [DownloadLinksController::class, 'getLatest']);
-Route::get('treatment', [TreatmentController::class, 'index'])->name('treatment.index');
+Route::post("auth/login", [AuthController::class, "authLogin"]);
+Route::post("auth/register", [AuthController::class, "register"]);
+Route::post("auth/resend-verification", [
+    AuthController::class,
+    "sendVerification",
+]);
+Route::post("auth/forgot-password", [AuthController::class, "forgotPassword"]);
+Route::post("auth/reset-password", [AuthController::class, "resetPassword"]);
+Route::get("download/latest", [DownloadLinksController::class, "getLatest"]);
+Route::get("treatment", [TreatmentController::class, "index"])->name(
+    "treatment.index",
+);
 
-
-Route::middleware(['auth:sanctum'])->group(function(){
-    Route::post('auth/logout', [AuthController::class, 'authLogout']);
+Route::middleware(["auth:sanctum"])->group(function () {
+    Route::post("auth/logout", [AuthController::class, "authLogout"]);
     Route::apiResources([
-        'cacao' => CacaoController::class,
-        'user' => UserController::class,
-        'download_link' =>DownloadLinksController::class,
+        "cacao" => CacaoController::class,
+        "user" => UserController::class,
+        "download_link" => DownloadLinksController::class,
     ]);
 
     //User
-    Route::get('user', [UserController::class, 'getMany']);
-    Route::get('user/{user}', [UserController::class, 'getOne']);
-    Route::get('current/user', [UserController::class, 'getCurrentUser']);
-    Route::get('user/count/all', [UserController::class, 'getUserCount']);
-    Route::get('user/count/today', [UserController::class, 'getUserSignToday']);
-    Route::put('user/update/verified/{user}', [UserController::class, 'updateUserVerification']);
+    Route::get("user", [UserController::class, "getMany"]);
+    Route::get("user/{user}", [UserController::class, "getOne"]);
+    Route::get("current/user", [UserController::class, "getCurrentUser"]);
+    Route::get("user/count/all", [UserController::class, "getUserCount"]);
+    Route::get("user/count/today", [UserController::class, "getUserSignToday"]);
+    Route::put("user/update/verified/{user}", [
+        UserController::class,
+        "updateUserVerification",
+    ]);
 
     //DownloadLinks
-    Route::get('download/latest/date', [DownloadLinksController::class, 'getLatestDate']);
+    Route::get("download/latest/date", [
+        DownloadLinksController::class,
+        "getLatestDate",
+    ]);
 
     //Cacao
-    Route::get('cacao/recent/upload', [CacaoController::class, 'getRecent']);
-    Route::get('cacao/status/count', [CacaoController::class, 'getStatusCount']);
-    Route::get('cacao/feed/{order}/{filter}', [CacaoController::class, 'index']);
-    Route::get('cacao/upload/today', [CacaoController::class, 'getUploadedTodayCount']);
-    Route::get('cacao/upload/years/option', [CacaoController::class, 'uploadYears']);
+    Route::get("cacao/recent/upload", [CacaoController::class, "getRecent"]);
+    Route::get("cacao/status/count", [
+        CacaoController::class,
+        "getStatusCount",
+    ]);
+    Route::get("cacao/feed/{order}/{filter}", [
+        CacaoController::class,
+        "index",
+    ]);
+    Route::get("cacao/upload/today", [
+        CacaoController::class,
+        "getUploadedTodayCount",
+    ]);
+    Route::get("cacao/upload/years/option", [
+        CacaoController::class,
+        "uploadYears",
+    ]);
 
     //Graph
-    Route::get('cacao/graph/yearly', [CacaoController::class, 'getCacaoYearGraph']);
-    Route::get('cacao/upload/trend', [CacaoController::class, 'getUploadCountByDate']);
+    Route::get("cacao/graph/yearly", [
+        CacaoController::class,
+        "getCacaoYearGraph",
+    ]);
+    Route::get("cacao/upload/trend", [
+        CacaoController::class,
+        "getUploadCountByDate",
+    ]);
 
     //Heatmap
-    Route::get('cacao/heatmap/{filter}', [CacaoController::class, 'getWeeklyHeatMapData']);
-    Route::get('cacao/heatmap/{filter}/{date}', [CacaoController::class, 'getCacaoHeatMapData']);
+    Route::get("cacao/heatmap/{filter}", [
+        CacaoController::class,
+        "getWeeklyHeatMapData",
+    ]);
+    Route::get("cacao/heatmap/{filter}/{date}", [
+        CacaoController::class,
+        "getCacaoHeatMapData",
+    ]);
 
     //Region Alert Table
-    Route::get('cacao/region/alert/{date}', [CacaoController::class, 'regionAlertData']);
+    Route::get("cacao/region/alert/{date}", [
+        CacaoController::class,
+        "regionAlertData",
+    ]);
 
-    Route::get('cacao/upload/count/{id}', [CacaoController::class, 'getUploadCountByUser']);
-    Route::get('cacao/user/upload/{id}', [CacaoController::class, 'getCacaoUploadedByUser']);
-    Route::get('cacao/disease/weeks', [CacaoController::class, 'getHighestDiseaseWithinTheWeek']);
+    Route::get("cacao/upload/count/{id}", [
+        CacaoController::class,
+        "getUploadCountByUser",
+    ]);
+    Route::get("cacao/user/upload/{id}", [
+        CacaoController::class,
+        "getCacaoUploadedByUser",
+    ]);
+    Route::get("cacao/disease/weeks", [
+        CacaoController::class,
+        "getHighestDiseaseWithinTheWeek",
+    ]);
 
     // Treatment routes
-    Route::post('treatment', [TreatmentController::class, 'store'])->name('treatment.store');
-    Route::get('treatment/{treatment}', [TreatmentController::class, 'show'])->name('treatment.show');
-    Route::put('treatment/{treatment}', [TreatmentController::class, 'update'])->name('treatment.update');
-    Route::delete('treatment/{treatment}', [TreatmentController::class, 'destroy'])->name('treatment.destroy');
-
+    Route::post("treatment", [TreatmentController::class, "store"])->name(
+        "treatment.store",
+    );
+    Route::get("treatment/{treatment}", [
+        TreatmentController::class,
+        "show",
+    ])->name("treatment.show");
+    Route::put("treatment/{treatment}", [
+        TreatmentController::class,
+        "update",
+    ])->name("treatment.update");
+    Route::delete("treatment/{treatment}", [
+        TreatmentController::class,
+        "destroy",
+    ])->name("treatment.destroy");
 });
-
