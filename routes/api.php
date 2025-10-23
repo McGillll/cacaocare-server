@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CacaoController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DownloadLinksController;
 use App\Http\Controllers\TreatmentController;
 use App\Http\Controllers\UserController;
@@ -27,6 +28,12 @@ Route::middleware(["auth:sanctum"])->group(function () {
         "user" => UserController::class,
         "download_link" => DownloadLinksController::class,
     ]);
+
+    // Comments
+    Route::get("cacaos/{cacao}/comments", [CommentController::class, "index"]);
+    Route::post("cacaos/{cacao}/comments", [CommentController::class, "store"]);
+    Route::put("comments/{comment}", [CommentController::class, "update"]);
+    Route::delete("comments/{comment}", [CommentController::class, "destroy"]);
 
     //User
     Route::get("user", [UserController::class, "getMany"]);

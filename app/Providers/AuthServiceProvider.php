@@ -2,18 +2,17 @@
 
 namespace App\Providers;
 
-use Carbon\Laravel\ServiceProvider;
+use App\Models\Comment;
+use App\Policies\CommentPolicy;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\URL;
+
 class AuthServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+    protected $policies = [
+        Comment::class => CommentPolicy::class,
+    ];
 
     /**
      * Bootstrap any application services.
@@ -22,11 +21,10 @@ class AuthServiceProvider extends ServiceProvider
     {
         VerifyEmail::createUrlUsing(function ($notifiable) {
             return URL::temporarySignedRoute(
-                'verification.verify',
+                "verification.verify",
                 now()->addMinutes(60),
-                ['id' => $notifiable->getKey()]
+                ["id" => $notifiable->getKey()],
             );
         });
     }
-
 }

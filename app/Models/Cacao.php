@@ -14,16 +14,22 @@ class Cacao extends Model
     use HasFactory, HasApiTokens, Notifiable, UsesUuid;
 
     protected $fillable = [
-        'uuid',
-        'label',
-        'confidence',
-        'photo',
-        'uploaderId',
-        'caption',
-        'date_analyzed'
+        "uuid",
+        "label",
+        "confidence",
+        "photo",
+        "uploaderId",
+        "caption",
+        "date_analyzed",
     ];
 
-    public function user(){
-        return $this->belongsTo(User::class, 'id');
+    public function user()
+    {
+        return $this->belongsTo(User::class, "uploaderId");
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 }
