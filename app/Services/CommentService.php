@@ -27,17 +27,17 @@ class CommentService
         return $comment;
     }
 
-    public function updateComment(Request $request, Comment $comment): Comment
+    public function updateComment(Request $request, int $id): Comment
     {
-        $comment->update($request->only('body'));
-
-        $comment->load('user:id,username,profile');
-
+        $comment = Comment::where('id' , $id)->with('user')->firstOrFail();
+        $comment->body = ($request->body);
+        $comment->save();
         return $comment;
     }
 
-    public function deleteComment(Comment $comment): void
+    public function deleteComment(int $id): void
     {
+        $comment = Comment::where('id' , $id)->firstOrFail();
         $comment->delete();
     }
 }

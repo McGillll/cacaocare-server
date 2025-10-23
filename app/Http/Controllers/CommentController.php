@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateCommentRequest;
 use App\Models\Cacao;
+use App\Models\Comment;
 use App\Services\CommentService;
 use App\Http\Requests\StoreCommentRequest;
 
@@ -36,18 +38,18 @@ class CommentController
      */
     public function update(
         UpdateCommentRequest $request,
-        Comment $comment,
+        int $id,
         CommentService $commentService,
     ) {
-        $this->authorize("update", $comment);
-        $comment = $commentService->updateComment($request, $comment);
-        return response()->json($comment);
+        $comment = $commentService->updateComment($request, $id);
+        return response()->json([
+            'data' => $comment
+        ],200);
     }
 
-    public function destroy(Comment $comment, CommentService $commentService)
+    public function destroy(int $id, CommentService $commentService)
     {
-        $this->authorize("delete", $comment);
-        $commentService->deleteComment($comment);
+        $commentService->deleteComment($id);
         return response()->json(null, 204);
     }
 }
