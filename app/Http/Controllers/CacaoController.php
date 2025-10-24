@@ -81,6 +81,7 @@ class CacaoController
         $cacao = Cacao::select('cacaos.*', 'users.username', 'users.profile', 'users.city', 'users.barangay')
                         ->join('users', 'users.id', '=', 'cacaos.uploaderId')
                         ->where('users.id', $id)
+                        ->orderBy('created_at', "desc")
                         ->paginate(9);
 
 
