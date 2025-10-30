@@ -23,7 +23,7 @@ class UserUpdateRequest extends FormRequest
     {
         return [
             'username' => 'sometimes|string',
-            'password' => 'sometimes|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).+$/',
+            'password' => 'sometimes|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*_]).+$/',
             'region' => 'sometimes|string',
             'province' => 'sometimes|string',
             'city' => 'sometimes|string',
