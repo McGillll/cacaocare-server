@@ -1,5 +1,19 @@
 # Latest Updates
 
+## 2026-07-24 — Treatment module refactored to layered architecture
+
+**What changed:**
+- `TreatmentController` moved to `App\Http\Controllers\Api\Treatment` with Interface → Repository → Service layers. Nested keypoint create/replace logic lives in `TreatmentService`/`TreatmentRepository` (wrapped in a DB transaction); JSON-string-vs-array normalization for `keypoints` (needed because FormData sends it as a JSON string) lives in the service layer.
+- Response envelope is now `{success, message, data}`, matching Auth/User/DownloadLinks. `GET /treatment` and `GET /treatment/{id}` responses are unchanged in shape (`data` = treatment object/array with a nested `keypoints` array), since the envelope preserves the existing `data` key.
+- **Behavior change:** `store`/`update`/`destroy` are now `role:admin` only (previously any authenticated user could hit them, though only the admin panel actually did).
+- **Removed dead code:** `TreatmentKeyPointController` and its two Form Requests were deleted — they had zero registered routes (keypoints were always managed as a nested part of Treatment, never as a standalone resource). Also removed two broken duplicate policy files (`TratmentPolicy.php`, `TratmentKeyPointPolicy.php`) that referenced a non-existent `Tratment` model.
+- `disease` uniqueness is now enforced by request validation (422 with a clean message) instead of surfacing as an unhandled SQL constraint error.
+- `GET /treatment` (index) stays public/no-auth, matching original behavior (used by the user-facing treatment-guide page).
+
+**Docs updated:** `api/rsc-doc/treatment-api.md` (new).
+
+**Frontend:** no code changes required — the only caller of `store`/`update`/`destroy` is the admin panel (`TreatmentLibrary.vue`), which already runs as admin. `update`'s existing FormData + `_method=PUT` + JSON-string `keypoints` pattern is unchanged and still supported.
+
 ## 2026-07-24 — DownloadLinks module refactored to layered architecture
 
 **What changed:**

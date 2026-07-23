@@ -2,16 +2,12 @@
 
 use App\Http\Controllers\CacaoController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\TreatmentController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/api/auth.php';
 require __DIR__.'/api/user.php';
 require __DIR__.'/api/download_link.php';
-
-Route::get("treatment", [TreatmentController::class, "index"])->name(
-    "treatment.index",
-);
+require __DIR__.'/api/treatment.php';
 
 Route::middleware(["auth:sanctum"])->group(function () {
     Route::apiResources([
@@ -45,21 +41,4 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::get("cacao/upload/count/{id}", [CacaoController::class,"getUploadCountByUser"]);
     Route::get("cacao/user/upload/{id}", [CacaoController::class,"getCacaoUploadedByUser"]);
     Route::get("cacao/disease/weeks", [CacaoController::class,"getHighestDiseaseWithinTheWeek"]);
-
-    // Treatment routes
-    Route::post("treatment", [TreatmentController::class, "store"])->name(
-        "treatment.store",
-    );
-    Route::get("treatment/{treatment}", [
-        TreatmentController::class,
-        "show",
-    ])->name("treatment.show");
-    Route::put("treatment/{treatment}", [
-        TreatmentController::class,
-        "update",
-    ])->name("treatment.update");
-    Route::delete("treatment/{treatment}", [
-        TreatmentController::class,
-        "destroy",
-    ])->name("treatment.destroy");
 });
