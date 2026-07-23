@@ -1,24 +1,18 @@
 <?php
 
 use App\Http\Controllers\CacaoController;
-use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/api/auth.php';
 require __DIR__.'/api/user.php';
 require __DIR__.'/api/download_link.php';
 require __DIR__.'/api/treatment.php';
+require __DIR__.'/api/comment.php';
 
 Route::middleware(["auth:sanctum"])->group(function () {
     Route::apiResources([
         "cacao" => CacaoController::class,
     ]);
-
-    // Comments
-    Route::get("cacaos/{cacao}/comments", [CommentController::class, "index"]);
-    Route::post("cacaos/{cacao}/comments", [CommentController::class, "store"]);
-    Route::put("comments/{comment}", [CommentController::class, "update"]);
-    Route::delete("comments/{comment}", [CommentController::class, "destroy"]);
 
     //Cacao
     Route::get("cacao/recent/upload", [CacaoController::class, "getRecent"]);

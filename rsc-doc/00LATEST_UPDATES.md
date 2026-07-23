@@ -1,5 +1,17 @@
 # Latest Updates
 
+## 2026-07-24 — Comment module refactored to layered architecture
+
+**What changed:**
+- `CommentController` moved to `App\Http\Controllers\Api\Comment` with Interface → Repository → Service layers.
+- **Breaking:** all four endpoints now return the uniform `{success, message, data}` envelope. Previously `index` returned the raw paginator with no wrapper, `store` returned the bare comment object, `update` was already `{data: ...}`, and `destroy` returned an empty 204. See `client/rsc-doc/frontend-flag.md` (FLAG 2) for exact frontend changes needed — not yet done.
+- **Security fix:** a `CommentPolicy` already existed with an owner-or-admin rule for `update`/`delete` but was never invoked anywhere — any authenticated user could edit or delete *any* comment via a direct API call (the UI only hid the buttons, it didn't stop the request). This is now enforced in `CommentService` (403 `UnauthorizedActionException` for non-owner, non-admin).
+- Identifier stays integer `id` — this module was not part of the uuid migration.
+
+**Docs updated:** `api/rsc-doc/comment-api.md` (new).
+
+**Frontend:** not yet updated — see `client/rsc-doc/frontend-flag.md` (FLAG 2). Two call sites in `CommentList.vue` need a `.data`/`.data.data` unwrap; `CommentItem.vue`'s update/delete call sites are unaffected.
+
 ## 2026-07-24 — Treatment module refactored to layered architecture
 
 **What changed:**
