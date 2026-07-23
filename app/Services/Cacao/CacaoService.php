@@ -9,6 +9,7 @@ use App\Models\Cacao;
 use App\Models\User;
 use App\Services\CacaoHeatmapService;
 use App\Services\CacaoYearGraphService;
+use App\Services\ImageUploadService;
 use App\Services\RegionAlertTableDataService;
 use App\Services\WeeklyCacaoHeatmapService;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +22,7 @@ class CacaoService implements CacaoServiceInterface
         private WeeklyCacaoHeatmapService $weeklyCacaoHeatmapService,
         private CacaoYearGraphService $cacaoYearGraphService,
         private RegionAlertTableDataService $regionAlertTableDataService,
+        private ImageUploadService $imageUploadService,
     ) {
     }
 
@@ -32,7 +34,7 @@ class CacaoService implements CacaoServiceInterface
     public function create(object $payload)
     {
         if (!empty($payload->photoFile)) {
-            $path = $payload->photoFile->store('cacao-photos/'.$payload->label, 'r2');
+            $path = $this->imageUploadService->storeAsWebp($payload->photoFile, 'cacao-photos/'.$payload->label, $payload->photoFile->hashName());
             $payload->photo = Storage::disk('r2')->url($path);
         }
 
@@ -44,7 +46,7 @@ class CacaoService implements CacaoServiceInterface
         $this->assertOwnerOrAdmin($authUser, $cacao);
 
         if (!empty($payload->photoFile)) {
-            $path = $payload->photoFile->store('cacao-photos/'.($payload->label ?? $cacao->label), 'r2');
+            $path = $this->imageUploadService->storeAsWebp($payload->photoFile, 'cacao-photos/'.($payload->label ?? $cacao->label), $payload->photoFile->hashName());
             $payload->photo = Storage::disk('r2')->url($path);
         }
 

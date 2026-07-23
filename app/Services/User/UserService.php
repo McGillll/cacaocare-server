@@ -6,13 +6,16 @@ use App\Exceptions\UnauthorizedActionException;
 use App\Interfaces\User\UserRepositoryInterface;
 use App\Interfaces\User\UserServiceInterface;
 use App\Models\User;
+use App\Services\ImageUploadService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class UserService implements UserServiceInterface
 {
-    public function __construct(private UserRepositoryInterface $userRepository)
-    {
+    public function __construct(
+        private UserRepositoryInterface $userRepository,
+        private ImageUploadService $imageUploadService,
+    ) {
     }
 
     public function all()
@@ -31,7 +34,7 @@ class UserService implements UserServiceInterface
 
         if (!empty($payload->profileFile)) {
             $filename = $target->uuid.'_'.$payload->profileFile->getClientOriginalName();
-            $path = $payload->profileFile->storeAs('profile-photos/'.$target->email, $filename, 'r2');
+            $path = $this->imageUploadService->storeAsWebp($payload->profileFile, 'profile-photos/'.$target->email, $filename);
             $payload->profile = Storage::disk('r2')->url($path);
         }
 
