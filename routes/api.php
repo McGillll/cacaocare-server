@@ -1,31 +1,22 @@
 <?php
 
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CacaoController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DownloadLinksController;
 use App\Http\Controllers\TreatmentController;
-use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::post("auth/login", [AuthController::class, "authLogin"]);
-Route::post("auth/register", [AuthController::class, "register"]);
-Route::post("auth/resend-verification", [
-    AuthController::class,
-    "sendVerification",
-]);
-Route::post("auth/forgot-password", [AuthController::class, "forgotPassword"]);
-Route::post("auth/reset-password", [AuthController::class, "resetPassword"]);
+require __DIR__.'/api/auth.php';
+require __DIR__.'/api/user.php';
+
 Route::get("download/latest", [DownloadLinksController::class, "getLatest"]);
 Route::get("treatment", [TreatmentController::class, "index"])->name(
     "treatment.index",
 );
 
 Route::middleware(["auth:sanctum"])->group(function () {
-    Route::post("auth/logout", [AuthController::class, "authLogout"]);
     Route::apiResources([
         "cacao" => CacaoController::class,
-        "user" => UserController::class,
         "download_link" => DownloadLinksController::class,
     ]);
 
@@ -34,17 +25,6 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::post("cacaos/{cacao}/comments", [CommentController::class, "store"]);
     Route::put("comments/{comment}", [CommentController::class, "update"]);
     Route::delete("comments/{comment}", [CommentController::class, "destroy"]);
-
-    //User
-    Route::get("user", [UserController::class, "getMany"]);
-    Route::get("user/{user}", [UserController::class, "getOne"]);
-    Route::get("current/user", [UserController::class, "getCurrentUser"]);
-    Route::get("user/count/all", [UserController::class, "getUserCount"]);
-    Route::get("user/count/today", [UserController::class, "getUserSignToday"]);
-    Route::put("user/update/verified/{user}", [
-        UserController::class,
-        "updateUserVerification",
-    ]);
 
     //DownloadLinks
     Route::get("download/latest/date", [DownloadLinksController::class, "getLatestDate"]);

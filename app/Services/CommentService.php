@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Controllers\UserController;
 use App\Models\Cacao;
 use App\Models\Comment;
 use Illuminate\Http\Request;
