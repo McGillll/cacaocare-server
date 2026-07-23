@@ -1,5 +1,18 @@
 # Latest Updates
 
+## 2026-07-24 — DownloadLinks module refactored to layered architecture
+
+**What changed:**
+- `DownloadLinksController` moved to `App\Http\Controllers\Api\DownloadLink` with Interface → Repository → Service layers.
+- Response envelope is now `{success, message, data}` on every DownloadLinks endpoint, matching Auth/User.
+- **Behavior change:** `store`/`update`/`destroy` are now `role:admin` only (previously any authenticated user could hit them, though only the admin panel actually did). `index`/`show`/`latestDate` remain open to any authenticated user; `latest` stays public.
+- `version` uniqueness is now enforced by request validation (422 with a clean message) instead of surfacing as an unhandled SQL constraint error.
+- Identifier stays integer `id` — this module was not part of the uuid migration.
+
+**Docs updated:** `api/rsc-doc/download-link-api.md` (new).
+
+**Frontend:** no code changes required — the only caller of `store`/`update`/`destroy` is the admin panel (`AppUpdates.vue`), which already runs as an admin. Response shape (`response.data`) is unchanged.
+
 ## 2026-07-24 — Auth + User modules refactored to layered architecture
 
 **What changed:**

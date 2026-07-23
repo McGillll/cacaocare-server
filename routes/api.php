@@ -2,14 +2,13 @@
 
 use App\Http\Controllers\CacaoController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\DownloadLinksController;
 use App\Http\Controllers\TreatmentController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/api/auth.php';
 require __DIR__.'/api/user.php';
+require __DIR__.'/api/download_link.php';
 
-Route::get("download/latest", [DownloadLinksController::class, "getLatest"]);
 Route::get("treatment", [TreatmentController::class, "index"])->name(
     "treatment.index",
 );
@@ -17,7 +16,6 @@ Route::get("treatment", [TreatmentController::class, "index"])->name(
 Route::middleware(["auth:sanctum"])->group(function () {
     Route::apiResources([
         "cacao" => CacaoController::class,
-        "download_link" => DownloadLinksController::class,
     ]);
 
     // Comments
@@ -25,9 +23,6 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::post("cacaos/{cacao}/comments", [CommentController::class, "store"]);
     Route::put("comments/{comment}", [CommentController::class, "update"]);
     Route::delete("comments/{comment}", [CommentController::class, "destroy"]);
-
-    //DownloadLinks
-    Route::get("download/latest/date", [DownloadLinksController::class, "getLatestDate"]);
 
     //Cacao
     Route::get("cacao/recent/upload", [CacaoController::class, "getRecent"]);
