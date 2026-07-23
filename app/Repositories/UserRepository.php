@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Interfaces\User\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserRepository implements UserRepositoryInterface
 {
@@ -24,7 +25,7 @@ class UserRepository implements UserRepositoryInterface
         $user->username = $payload->username;
         $user->email = $payload->email;
         $user->password = Hash::make($payload->password);
-        $user->profile = 'https://cacaocare.s3.ap-southeast-2.amazonaws.com/profile-photos/default_profile.png';
+        $user->profile = Storage::disk('r2')->url('profile-photos/default_profile.png');
         $user->region = $payload->region ?? null;
         $user->province = $payload->province ?? null;
         $user->city = $payload->city ?? null;

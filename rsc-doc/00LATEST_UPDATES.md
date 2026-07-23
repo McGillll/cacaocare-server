@@ -1,5 +1,20 @@
 # Latest Updates
 
+## 2026-07-24 — Cacao module refactored to layered architecture (final module)
+
+**What changed:**
+- `CacaoController` moved to `App\Http\Controllers\Api\Cacao` with Interface → Repository → Service layers. The four existing specialized query classes (`CacaoHeatmapService`, `WeeklyCacaoHeatmapService`, `CacaoYearGraphService`, `RegionAlertTableDataService`) are unchanged and now injected into the new `CacaoService`.
+- **Bug fix:** `show` used to query `Cacao::where('uploaderId', $id)` (looked up by uploader, not the entry's own id — returned an arbitrary entry). Now correctly resolves by the entry's own id via route-model binding.
+- **Validation gap closed:** `CacaoStoreRequest` existed but was never wired to the route (controller was typed `Request`, not `CacaoStoreRequest`) — no validation ever ran on create. Now wired, deliberately kept lenient (no format constraints beyond what already implicitly failed before) since a mobile app's exact payload format couldn't be verified from this repo.
+- **`update`/`destroy` implemented for the first time** — `update` didn't exist as a method at all (the registered route would 500 if hit); `destroy` was an empty no-op. Both are now real, gated owner-or-admin (`CacaoService`), matching the Comment/User pattern. Neither has a known caller today.
+- Response envelope is now `{success, message, data}` on every endpoint, **except** the two paginated endpoints (`feed`, `cacaoUploadedByUser`) which deliberately preserve their exact original nested shape (`data` = full paginator, plus a sibling `meta: {total_pages, ...}`) since the frontend reads that shape directly. `store`'s response also deliberately keeps its exact original `message` text and `data` key — additive-only change, since a mobile app depends on it and its exact request/response contract couldn't be fully verified from this repo.
+- Removed the broken `apiResources('cacao', ...)` registration, which pointed `PUT/PATCH /cacao/{cacao}` at a nonexistent `update` method and generated a same-path `GET /cacao` route with no `{order}/{filter}` params the real `index` method required (would 500 if ever hit — dead route, never called by this frontend).
+- `GeocodingService` confirmed unused/dead — left untouched.
+
+**Docs updated:** `api/rsc-doc/cacao-api.md` (new).
+
+**Frontend:** no code changes required — all endpoints this frontend actually calls keep their exact response shape. `update`/`destroy` are new capability, not a behavior change for existing callers.
+
 ## 2026-07-24 — Comment module refactored to layered architecture
 
 **What changed:**

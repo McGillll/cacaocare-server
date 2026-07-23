@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Interfaces\Cacao\CacaoRepositoryInterface;
 use App\Interfaces\Comment\CommentRepositoryInterface;
 use App\Interfaces\DownloadLink\DownloadLinkRepositoryInterface;
 use App\Interfaces\Treatment\TreatmentRepositoryInterface;
 use App\Interfaces\User\UserRepositoryInterface;
+use App\Repositories\CacaoRepository;
 use App\Repositories\CommentRepository;
 use App\Repositories\DownloadLinkRepository;
 use App\Repositories\TreatmentRepository;
@@ -20,5 +22,6 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(DownloadLinkRepositoryInterface::class, DownloadLinkRepository::class);
         $this->app->bind(TreatmentRepositoryInterface::class, TreatmentRepository::class);
         $this->app->bind(CommentRepositoryInterface::class, CommentRepository::class);
+        $this->app->bind(CacaoRepositoryInterface::class, CacaoRepository::class);
     }
 }

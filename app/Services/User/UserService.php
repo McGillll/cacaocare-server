@@ -7,6 +7,7 @@ use App\Interfaces\User\UserRepositoryInterface;
 use App\Interfaces\User\UserServiceInterface;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class UserService implements UserServiceInterface
 {
@@ -30,8 +31,8 @@ class UserService implements UserServiceInterface
 
         if (!empty($payload->profileFile)) {
             $filename = $target->uuid.'_'.$payload->profileFile->getClientOriginalName();
-            $path = $payload->profileFile->storeAs('profile-photos/'.$target->email, $filename);
-            $payload->profile = 'https://cacaocare.s3.ap-southeast-2.amazonaws.com/'.$path;
+            $path = $payload->profileFile->storeAs('profile-photos/'.$target->email, $filename, 'r2');
+            $payload->profile = Storage::disk('r2')->url($path);
         }
 
         return $this->userRepository->update($target, $payload);
