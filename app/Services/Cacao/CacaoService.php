@@ -12,10 +12,15 @@ use App\Services\CacaoYearGraphService;
 use App\Services\ImageUploadService;
 use App\Services\RegionAlertTableDataService;
 use App\Services\WeeklyCacaoHeatmapService;
+use App\Support\CacaoCache;
 use Illuminate\Support\Facades\Storage;
 
 class CacaoService implements CacaoServiceInterface
 {
+    private const ANALYTICS_TTL = 300;
+
+    private const LIST_TTL = 60;
+
     public function __construct(
         private CacaoRepositoryInterface $cacaoRepository,
         private CacaoHeatmapService $cacaoHeatmapService,
@@ -28,7 +33,10 @@ class CacaoService implements CacaoServiceInterface
 
     public function feed(object $payload)
     {
-        return $this->cacaoRepository->feed($payload);
+        $page = request()->query('page', 1);
+        $key = "feed:{$payload->order}:{$payload->filter}:{$payload->username}:{$page}";
+
+        return CacaoCache::remember($key, self::LIST_TTL, fn () => $this->cacaoRepository->feed($payload));
     }
 
     public function create(object $payload)
@@ -76,88 +84,92 @@ class CacaoService implements CacaoServiceInterface
 
     public function recent()
     {
-        return $this->cacaoRepository->recent();
+        return CacaoCache::remember('recent', self::LIST_TTL, fn () => $this->cacaoRepository->recent());
     }
 
     public function statusCount()
     {
-        return $this->cacaoRepository->statusCount();
+        return CacaoCache::remember('status-count', self::ANALYTICS_TTL, fn () => $this->cacaoRepository->statusCount());
     }
 
     public function uploadedTodayCount()
     {
-        return $this->cacaoRepository->uploadedTodayCount();
+        return CacaoCache::remember('uploaded-today', self::ANALYTICS_TTL, fn () => $this->cacaoRepository->uploadedTodayCount());
     }
 
     public function uploadYears()
     {
-        return $this->regionAlertTableDataService->years();
+        return CacaoCache::remember('upload-years', self::ANALYTICS_TTL, fn () => $this->regionAlertTableDataService->years());
     }
 
     public function uploadCountByDate()
     {
-        return $this->cacaoRepository->uploadCountByDate();
+        return CacaoCache::remember('upload-count-by-date', self::ANALYTICS_TTL, fn () => $this->cacaoRepository->uploadCountByDate());
     }
 
     public function uploadCountByUser(int $userId)
     {
-        return $this->cacaoRepository->uploadCountByUser($userId);
+        return CacaoCache::remember("upload-count-by-user:{$userId}", self::LIST_TTL, fn () => $this->cacaoRepository->uploadCountByUser($userId));
     }
 
     public function cacaoUploadedByUser(int $userId)
     {
-        return $this->cacaoRepository->cacaoUploadedByUser($userId);
+        $page = request()->query('page', 1);
+
+        return CacaoCache::remember("cacao-by-user:{$userId}:{$page}", self::LIST_TTL, fn () => $this->cacaoRepository->cacaoUploadedByUser($userId));
     }
 
     public function highestDiseaseWithinTheWeek()
     {
-        return $this->cacaoRepository->highestDiseaseWithinTheWeek();
+        return CacaoCache::remember('highest-disease-within-week', self::ANALYTICS_TTL, fn () => $this->cacaoRepository->highestDiseaseWithinTheWeek());
     }
 
     public function yearGraph(int $year, ?string $region, ?string $city)
     {
-        return [
+        return CacaoCache::remember("year-graph:{$year}:{$region}:{$city}", self::ANALYTICS_TTL, fn () => [
             'blackpod' => $this->cacaoYearGraphService->getYearlyBlackpodData((string) $year, $region, $city),
             'frostypod' => $this->cacaoYearGraphService->getYearlyFrostypodData((string) $year, $region, $city),
-        ];
+        ]);
     }
 
     public function weeklyHeatmap(string $filter)
     {
         $status = $this->resolveDiseaseStatus($filter);
 
-        return [
+        return CacaoCache::remember("weekly-heatmap:{$filter}", self::ANALYTICS_TTL, fn () => [
             'uploaded' => $this->weeklyCacaoHeatmapService->result($status),
             'total' => $this->weeklyCacaoHeatmapService->totalCount($status),
-        ];
+        ]);
     }
 
     public function heatmapForDate(string $filter, string $date)
     {
         $status = $this->resolveDiseaseStatus($filter);
 
-        return [
+        return CacaoCache::remember("heatmap:{$filter}:{$date}", self::ANALYTICS_TTL, fn () => [
             'uploaded' => $this->cacaoHeatmapService->result($status, $date),
             'total' => $this->cacaoHeatmapService->totalCount($status, $date),
-        ];
+        ]);
     }
 
     public function regionAlertData(string $year)
     {
-        $region = $this->regionAlertTableDataService->result($year);
-        $totalCount = $this->regionAlertTableDataService->totalCount($year);
-        $totalCity = $this->regionAlertTableDataService->totalCity($year);
-        $totalBlackPod = $this->cacaoHeatmapService->totalCount(['Black Pod Rot'], $year);
-        $totalFrostyPod = $this->cacaoHeatmapService->totalCount(['Frosty Pod Rot'], $year);
+        return CacaoCache::remember("region-alert:{$year}", self::ANALYTICS_TTL, function () use ($year) {
+            $region = $this->regionAlertTableDataService->result($year);
+            $totalCount = $this->regionAlertTableDataService->totalCount($year);
+            $totalCity = $this->regionAlertTableDataService->totalCity($year);
+            $totalBlackPod = $this->cacaoHeatmapService->totalCount(['Black Pod Rot'], $year);
+            $totalFrostyPod = $this->cacaoHeatmapService->totalCount(['Frosty Pod Rot'], $year);
 
-        return [
-            'uploaded' => $region,
-            'total_users' => $totalCount,
-            'total_blackpod_uploads' => $totalBlackPod,
-            'total_frostypod_uploads' => $totalFrostyPod,
-            'total_diseased_uploads' => $totalBlackPod + $totalFrostyPod,
-            'total_city' => $totalCity,
-        ];
+            return [
+                'uploaded' => $region,
+                'total_users' => $totalCount,
+                'total_blackpod_uploads' => $totalBlackPod,
+                'total_frostypod_uploads' => $totalFrostyPod,
+                'total_diseased_uploads' => $totalBlackPod + $totalFrostyPod,
+                'total_city' => $totalCity,
+            ];
+        });
     }
 
     private function resolveDiseaseStatus(string $filter)

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\CacaoCache;
 use App\Traits\UsesUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,6 +23,12 @@ class Cacao extends Model
         "caption",
         "date_analyzed",
     ];
+
+    protected static function booted()
+    {
+        static::saved(fn () => CacaoCache::flush());
+        static::deleted(fn () => CacaoCache::flush());
+    }
 
     public function user()
     {
