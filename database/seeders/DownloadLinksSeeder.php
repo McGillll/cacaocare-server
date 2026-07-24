@@ -14,12 +14,20 @@ class DownloadLinksSeeder extends Seeder
     public function run(): void
     {
         DB::table('download_links')->insert([
-            'id' => 1,
-            'download_link' => 'https://drive.google.com/drive/folders/1lc3OABN1dc35VDGtypniNHY6Z69D6OqO?usp=sharing',
-            'description' => 'First launch version',
-            'version' => 'v_1.0.0',
-            'created_at' => now(),
-            'updated_at' => now(),
+            [
+                'download_link' => 'https://github.com/McGillll/CacaoCare_App/releases/download/v.1/CacaoCare.v.1.apk',
+                'description' => 'First launch version',
+                'version' => 'v1',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'download_link' => 'https://github.com/McGillll/CacaoCare_App/releases/download/v2/CacaoCare.apk',
+                'description' => 'Second release version',
+                'version' => 'v2',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }
