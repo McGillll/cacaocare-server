@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use DB;
 use Hash;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Str;
 
@@ -22,7 +21,6 @@ class UserSeeder extends Seeder
             'username' => 'Admin',
             'email' => 'cacaocare.ph@gmail.com',
             'password' => Hash::make('CacaoCare_123'),
-            'profile' => 'https://cacaocare.s3.ap-southeast-2.amazonaws.com/profile-photos/default_profile.png',
             'region' => 'Region XI (Davao Region)',
             'province' => 'Davao del Sur',
             'city' => 'City of Davao',

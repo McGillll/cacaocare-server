@@ -13,7 +13,7 @@ Base path: `/api`. A Cacao entry is an AI-classified pod scan (label = disease/h
 | GET | `/cacao/{id}` | any authenticated user | Get one entry |
 | PUT | `/cacao/{id}` | owner or admin | Update an entry |
 | DELETE | `/cacao/{id}` | owner or admin | Delete an entry |
-| GET | `/cacao/recent/upload` | any authenticated user | Latest 3 uploads |
+| GET | `/cacao/recent/upload` | any authenticated user | Latest 3 uploads — `data` = `{ "cacao": [...] }`, not the array directly |
 | GET | `/cacao/status/count` | any authenticated user | Healthy/diseased/all counts |
 | GET | `/cacao/upload/today` | any authenticated user | Count uploaded in last 24h |
 | GET | `/cacao/upload/years/option` | any authenticated user | Distinct years with uploads |
@@ -24,7 +24,7 @@ Base path: `/api`. A Cacao entry is an AI-classified pod scan (label = disease/h
 | GET | `/cacao/region/alert/{date}` | any authenticated user | Region alert table for a given year |
 | GET | `/cacao/upload/count/{userId}` | any authenticated user | Healthy/diseased/all counts for one user |
 | GET | `/cacao/user/upload/{userId}` | any authenticated user | Paginated (9/page) uploads by one user |
-| GET | `/cacao/disease/weeks` | any authenticated user | Highest-count diseased label(s) in the last 7 days |
+| GET | `/cacao/disease/weeks` | any authenticated user | Highest-count diseased label(s) in the last 7 days — `data` = `{ "cacao": ... }`, not the value directly |
 
 Identifier stays integer `id` (no uuid).
 
@@ -39,6 +39,7 @@ Identifier stays integer `id` (no uuid).
 - **`store` validation is now actually wired.** The old `CacaoStoreRequest` class existed but was never used — the controller was type-hinted `Request $request`, not `CacaoStoreRequest`, so no validation ever ran; a malformed payload would previously crash with a raw PHP/SQL error instead of a clean 422. The request shape is unchanged: multipart form-data with a `cacao` field containing a JSON string (`label`, `confidence`, `date_analyzed`, `caption`, `uploaderId`) plus a separate `photo` file field. Validation was kept deliberately lenient (no format regex on `confidence`) since the exact mobile payload format couldn't be verified from this repo — only presence/type/existence checks that were already implicitly required (a missing `label` already crashed before; a nonexistent `uploaderId` already violated the FK constraint before).
 - **Response envelope** is now `{success, message, data}` — but for the two paginated endpoints (`feed`, `cacaoUploadedByUser`), the *exact* original nested shape is preserved on purpose: `data` holds the full paginator (so `data.data` is the items array, matching what the frontend already reads), and a sibling top-level `meta: {current_page, total_pages, per_page, total}` is kept as its own key (not folded into the paginator's native `last_page` field), because `Feed.vue` and `myprofile.vue` read `response.meta.total_pages` specifically. `store`'s response keeps its original `message` text (`"Cacao entry created successfully!"`) and the `data` key, only adding `success` — safe for the mobile client since it's purely additive.
 - **`update`/`destroy` are newly functional** (see above) — no frontend or known mobile caller exists today, so their shape was designed fresh rather than reverse-engineered.
+- `recent/upload` and `disease/weeks` wrap their payload in a `cacao` key inside `data` (`{ "data": { "cacao": [...] } }`) rather than putting the array/value directly in `data` — pre-existing shape, unchanged by the refactor, just not previously called out here.
 - Heatmap/graph/region-alert logic is unchanged — still delegates to the existing `CacaoHeatmapService`, `WeeklyCacaoHeatmapService`, `CacaoYearGraphService`, `RegionAlertTableDataService` classes (now injected into `CacaoService` rather than the controller directly). These use MySQL-specific raw SQL (`YEAR()`, `DATE_FORMAT()`) — a pre-existing characteristic, not something introduced here.
 - `GeocodingService` is unused dead code (confirmed via search) — left untouched, out of scope for this pass.
 

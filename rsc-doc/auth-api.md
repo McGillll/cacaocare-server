@@ -46,9 +46,11 @@ Rate-limited: 5 attempts/minute per email+IP (`throttle:login`).
   "success": true,
   "message": null,
   "token": "<sanctum-plain-text-token>",
-  "data": { "uuid": "...", "username": "...", "email": "...", "role": "user", "email_verified_at": "..." }
+  "data": { "id": 0, "uuid": "...", "username": "...", "email": "...", "profile": "...", "region": "...", "province": "...", "city": "...", "barangay": "...", "role": "user", "email_verified_at": "..." }
 }
 ```
+
+`data` is the full `UserResource` shape (`api/app/Http/Resources/UserResource.php`) — every user field, not a trimmed-down subset.
 
 **Errors**
 - 401 — credentials don't match: `{ "success": false, "message": "These credentials do not match our records.", "data": null }`
