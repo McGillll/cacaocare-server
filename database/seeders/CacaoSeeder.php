@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use DB;
 use Illuminate\Database\Seeder;
 use Str;
-use function Laravel\Prompts\table;
 
 class CacaoSeeder extends Seeder
 {
@@ -14,13 +13,29 @@ class CacaoSeeder extends Seeder
      */
     public function run(): void
     {
-        $disease = ["Black Pod Rot", "Frosty Pod Rot"];
+        $photosByLabel = [
+            'Healthy Pod' => [
+                'https://upload.wikimedia.org/wikipedia/commons/2/21/Cacao_pods.jpg',
+            ],
+            'Black Pod Rot' => [
+                'https://live.staticflickr.com/1136/4598574864_a1d225d065_b.jpg',
+            ],
+            'Frosty Pod Rot' => [
+                'https://blog.plantwise.org/wp-content/uploads/sites/7/2016/10/cocoa-pod-with-frosty-pod-rot_for-cabi_org.jpg',
+            ],
+        ];
+
+        $labels = array_keys($photosByLabel);
+
         for ($i = 1; $i <= 10; $i++) {
+            $label = $labels[array_rand($labels)];
+            $photos = $photosByLabel[$label];
+
             DB::table('cacaos')->insert([
                 'uuid' => Str::random(20),
-                'label' => $disease[rand(0,1)],
+                'label' => $label,
                 'confidence' => rand(70, 99) / 100,
-                'photo' => 'photo_' . $i . '.jpg',
+                'photo' => $photos[array_rand($photos)],
                 'uploaderId' => 1,
                 'caption' => Str::random(20),
                 'date_analyzed' => now()->subDays(rand(1, 30)),
