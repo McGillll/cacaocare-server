@@ -12,7 +12,7 @@ Base path: `/api`. A Cacao entry is an AI-classified pod scan (label = disease/h
 | GET | `/cacao/feed/{order}/{filter}` | any authenticated user | Paginated feed (6/page), `?username=` search |
 | GET | `/cacao/{id}` | any authenticated user | Get one entry |
 | PUT | `/cacao/{id}` | owner or admin | Update an entry |
-| DELETE | `/cacao/{id}` | owner or admin | Delete an entry |
+| DELETE | `/cacao/{id}` | owner or admin | Soft-delete an entry (row is retained with `deleted_at` set, not hard-deleted) |
 | GET | `/cacao/recent/upload` | any authenticated user | Latest 3 uploads — `data` = `{ "cacao": [...] }`, not the array directly |
 | GET | `/cacao/status/count` | any authenticated user | Healthy/diseased/all counts |
 | GET | `/cacao/upload/today` | any authenticated user | Count uploaded in last 24h |
@@ -42,6 +42,7 @@ Identifier stays integer `id` (no uuid).
 - `recent/upload` and `disease/weeks` wrap their payload in a `cacao` key inside `data` (`{ "data": { "cacao": [...] } }`) rather than putting the array/value directly in `data` — pre-existing shape, unchanged by the refactor, just not previously called out here.
 - Heatmap/graph/region-alert logic is unchanged — still delegates to the existing `CacaoHeatmapService`, `WeeklyCacaoHeatmapService`, `CacaoYearGraphService`, `RegionAlertTableDataService` classes (now injected into `CacaoService` rather than the controller directly). These use MySQL-specific raw SQL (`YEAR()`, `DATE_FORMAT()`) — a pre-existing characteristic, not something introduced here.
 - `GeocodingService` is unused dead code (confirmed via search) — left untouched, out of scope for this pass.
+- **`cacaos` now uses soft deletes.** `destroy` no longer removes the row — it sets `deleted_at`, and default Eloquent queries (`show`, `feed`, `recent`, all analytics/heatmap/graph queries) automatically exclude soft-deleted entries. No restore or trashed-listing endpoint exists yet.
 
 ## Response envelope
 
@@ -86,14 +87,13 @@ Decoded fields:
 
 ## PUT /cacao/{id}
 
-Multipart (POST transport + `_method=PUT`, per file-upload convention).
-
 | Field | Rules |
 |---|---|
 | label | sometimes, string |
 | caption | sometimes, string |
 | date_analyzed | sometimes, date |
-| photo | sometimes, image |
+
+The photo cannot be changed on update — `photo` is accepted on create only. Any `photo` sent on this endpoint is ignored.
 
 **Errors** — 403 not owner/admin; 404 not found; 422 validation failure.
 

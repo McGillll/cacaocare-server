@@ -16,6 +16,10 @@ interface UserRepositoryInterface
 
     public function delete(User $user);
 
+    public function trashed();
+
+    public function restore(User $user);
+
     public function countByRole(string $role);
 
     public function countCreatedToday(string $role);

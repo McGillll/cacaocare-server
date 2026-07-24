@@ -56,7 +56,22 @@ class UserService implements UserServiceInterface
         $this->assertOwnerOrAdmin($authUser, $target);
 
         // Soft delete only — the profile image is left in place in case the account is restored.
-        return $this->userRepository->delete($target);
+        $deleted = $this->userRepository->delete($target);
+
+        // Revoke existing tokens so a soft-deleted user can't keep using an already-issued session.
+        $target->tokens()->delete();
+
+        return $deleted;
+    }
+
+    public function trashed()
+    {
+        return $this->userRepository->trashed();
+    }
+
+    public function restore(User $target)
+    {
+        return $this->userRepository->restore($target);
     }
 
     public function toggleVerification(User $target)

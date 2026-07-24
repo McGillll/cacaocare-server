@@ -14,12 +14,16 @@ Base path: `/api`. All routes require `Authorization: Bearer <token>` (`auth:san
 | POST | `/user` | any authenticated user | Create a user directly (admin tooling) |
 | GET | `/user/{uuid}` | any authenticated user | Get one user |
 | PUT | `/user/{uuid}` | owner or admin | Update a user (multipart — see note) |
-| DELETE | `/user/{uuid}` | owner or admin | Delete a user |
+| DELETE | `/user/{uuid}` | owner or admin | Soft-delete a user (row retained with `deleted_at` set) and revoke all their access tokens |
 
 ## Who can do what
 
 - **Admin-only** (`role:admin` middleware): `index`, `getUserCount`, `getUserSignToday`, `updateUserVerification`.
 - **Owner-or-admin** (checked in `UserService`, not middleware — the ownership check needs the resolved `{uuid}` from the route, which middleware can't see): `update`, `destroy`. A non-owner, non-admin request throws `UnauthorizedActionException` → 403.
+
+## Soft delete
+
+`users` uses soft deletes. `DELETE /user/{uuid}` sets `deleted_at` instead of removing the row, and also revokes all of the target user's Sanctum tokens (`$target->tokens()->delete()`) so an already-issued session can't keep authenticating past the deletion. A soft-deleted user also can't log back in — `AuthService::login()` looks the user up via `User::where('email', ...)`, and Eloquent's default soft-delete scope excludes trashed rows from that query automatically. No restore or trashed-listing endpoint exists yet.
 
 ## Breaking change: identifier
 

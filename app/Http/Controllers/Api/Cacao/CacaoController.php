@@ -58,9 +58,6 @@ class CacaoController
     public function update(CacaoUpdateRequest $request, Cacao $cacao)
     {
         $payload = (object) $request->validated();
-        if ($request->hasFile('photo')) {
-            $payload->photoFile = $request->file('photo');
-        }
 
         $updated = $this->cacaoService->update($request->user(), $cacao, $payload);
 

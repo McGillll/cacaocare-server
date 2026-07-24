@@ -10,6 +10,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('user/count/all', [UserController::class, 'getUserCount'])->middleware('role:admin');
     Route::get('user/count/today', [UserController::class, 'getUserSignToday'])->middleware('role:admin');
     Route::put('user/update/verified/{user}', [UserController::class, 'updateUserVerification'])->middleware('role:admin');
+    Route::get('user/trashed/all', [UserController::class, 'trashed'])->middleware('role:admin');
+    Route::put('user/trashed/restore/{user}', [UserController::class, 'restore'])->withTrashed()->middleware('role:admin');
 
     Route::post('user', [UserController::class, 'store']);
     Route::get('user/{user}', [UserController::class, 'show']);

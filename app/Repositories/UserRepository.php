@@ -69,6 +69,18 @@ class UserRepository implements UserRepositoryInterface
         return $user->delete();
     }
 
+    public function trashed()
+    {
+        return User::onlyTrashed()->where('role', 'user')->latest('deleted_at')->get();
+    }
+
+    public function restore(User $user)
+    {
+        $user->restore();
+
+        return $user;
+    }
+
     public function countByRole(string $role)
     {
         return User::where('role', $role)->count();

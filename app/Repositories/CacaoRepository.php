@@ -59,9 +59,6 @@ class CacaoRepository implements CacaoRepositoryInterface
         if (!empty($payload->date_analyzed)) {
             $cacao->date_analyzed = $payload->date_analyzed;
         }
-        if (!empty($payload->photo)) {
-            $cacao->photo = $payload->photo;
-        }
         $cacao->save();
 
         return $cacao;

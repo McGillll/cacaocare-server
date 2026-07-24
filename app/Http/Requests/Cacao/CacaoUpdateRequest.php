@@ -17,7 +17,6 @@ class CacaoUpdateRequest extends FormRequest
             'label' => 'sometimes|string',
             'caption' => 'sometimes|string',
             'date_analyzed' => 'sometimes|date',
-            'photo' => 'sometimes|image|mimes:jpg,jpeg,png',
         ];
     }
 }

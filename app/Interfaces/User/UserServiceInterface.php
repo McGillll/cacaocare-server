@@ -14,6 +14,10 @@ interface UserServiceInterface
 
     public function delete(User $authUser, User $target);
 
+    public function trashed();
+
+    public function restore(User $target);
+
     public function toggleVerification(User $target);
 
     public function countAll();

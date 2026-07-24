@@ -6,13 +6,14 @@ use App\Support\CacaoCache;
 use App\Traits\UsesUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class Cacao extends Model
 {
     /** @use HasFactory<\Database\Factories\CacaoFactory> */
-    use HasFactory, HasApiTokens, Notifiable, UsesUuid;
+    use HasFactory, HasApiTokens, Notifiable, UsesUuid, SoftDeletes;
 
     protected $fillable = [
         "uuid",

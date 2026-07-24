@@ -57,6 +57,20 @@ class UserController
         return $this->success(null, 'User deleted successfully.');
     }
 
+    public function trashed()
+    {
+        $users = $this->userService->trashed();
+
+        return $this->success(UserResource::collection($users));
+    }
+
+    public function restore(User $user)
+    {
+        $restored = $this->userService->restore($user);
+
+        return $this->success(new UserResource($restored), 'User restored successfully.');
+    }
+
     public function getCurrentUser(Request $request)
     {
         return $this->success(new UserResource($request->user()));
