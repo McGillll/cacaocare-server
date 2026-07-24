@@ -4,7 +4,7 @@ use App\Http\Controllers\Api\Cacao\CacaoController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('cacao', [CacaoController::class, 'store']);
+    Route::post('cacao', [CacaoController::class, 'store'])->middleware('throttle:upload');
 
     Route::get('cacao/feed/{order}/{filter}', [CacaoController::class, 'feed']);
     Route::get('cacao/recent/upload', [CacaoController::class, 'getRecent']);
@@ -25,6 +25,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('cacao/disease/weeks', [CacaoController::class, 'getHighestDiseaseWithinTheWeek']);
 
     Route::get('cacao/{cacao}', [CacaoController::class, 'show']);
-    Route::put('cacao/{cacao}', [CacaoController::class, 'update']);
+    Route::put('cacao/{cacao}', [CacaoController::class, 'update'])->middleware('throttle:upload');
     Route::delete('cacao/{cacao}', [CacaoController::class, 'destroy']);
 });

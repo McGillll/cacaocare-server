@@ -13,6 +13,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('user', [UserController::class, 'store']);
     Route::get('user/{user}', [UserController::class, 'show']);
-    Route::put('user/{user}', [UserController::class, 'update']);
+    Route::put('user/{user}', [UserController::class, 'update'])->middleware('throttle:upload');
     Route::delete('user/{user}', [UserController::class, 'destroy']);
 });
