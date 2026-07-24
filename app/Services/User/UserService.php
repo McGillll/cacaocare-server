@@ -55,15 +55,8 @@ class UserService implements UserServiceInterface
     {
         $this->assertOwnerOrAdmin($authUser, $target);
 
-        $profile = $target->profile;
-
-        $deleted = $this->userRepository->delete($target);
-
-        if ($profile !== Storage::disk('r2')->url(self::DEFAULT_PROFILE_PATH)) {
-            $this->imageUploadService->deleteFromUrl($profile);
-        }
-
-        return $deleted;
+        // Soft delete only — the profile image is left in place in case the account is restored.
+        return $this->userRepository->delete($target);
     }
 
     public function toggleVerification(User $target)
