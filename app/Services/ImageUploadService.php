@@ -20,4 +20,17 @@ class ImageUploadService
 
         return $path;
     }
+
+    public function deleteFromUrl(?string $url, string $disk = 'r2')
+    {
+        if (empty($url)) {
+            return;
+        }
+
+        $path = ltrim(parse_url($url, PHP_URL_PATH) ?? '', '/');
+
+        if ($path !== '' && Storage::disk($disk)->exists($path)) {
+            Storage::disk($disk)->delete($path);
+        }
+    }
 }

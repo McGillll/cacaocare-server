@@ -45,19 +45,33 @@ class CacaoService implements CacaoServiceInterface
     {
         $this->assertOwnerOrAdmin($authUser, $cacao);
 
+        $oldPhoto = $cacao->photo;
+
         if (!empty($payload->photoFile)) {
             $path = $this->imageUploadService->storeAsWebp($payload->photoFile, 'cacao-photos/'.($payload->label ?? $cacao->label), $payload->photoFile->hashName());
             $payload->photo = Storage::disk('r2')->url($path);
         }
 
-        return $this->cacaoRepository->update($cacao, $payload);
+        $updated = $this->cacaoRepository->update($cacao, $payload);
+
+        if (!empty($payload->photoFile)) {
+            $this->imageUploadService->deleteFromUrl($oldPhoto);
+        }
+
+        return $updated;
     }
 
     public function delete(User $authUser, Cacao $cacao)
     {
         $this->assertOwnerOrAdmin($authUser, $cacao);
 
-        return $this->cacaoRepository->delete($cacao);
+        $photo = $cacao->photo;
+
+        $deleted = $this->cacaoRepository->delete($cacao);
+
+        $this->imageUploadService->deleteFromUrl($photo);
+
+        return $deleted;
     }
 
     public function recent()

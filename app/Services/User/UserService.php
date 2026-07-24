@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 
 class UserService implements UserServiceInterface
 {
+    private const DEFAULT_PROFILE_PATH = 'profile-photos/default_profile.png';
+
     public function __construct(
         private UserRepositoryInterface $userRepository,
         private ImageUploadService $imageUploadService,
@@ -32,20 +34,36 @@ class UserService implements UserServiceInterface
     {
         $this->assertOwnerOrAdmin($authUser, $target);
 
+        $oldProfile = $target->profile;
+
         if (!empty($payload->profileFile)) {
             $filename = $target->uuid.'_'.$payload->profileFile->getClientOriginalName();
             $path = $this->imageUploadService->storeAsWebp($payload->profileFile, 'profile-photos/'.$target->email, $filename);
             $payload->profile = Storage::disk('r2')->url($path);
         }
 
-        return $this->userRepository->update($target, $payload);
+        $updated = $this->userRepository->update($target, $payload);
+
+        if (!empty($payload->profileFile) && $oldProfile !== Storage::disk('r2')->url(self::DEFAULT_PROFILE_PATH)) {
+            $this->imageUploadService->deleteFromUrl($oldProfile);
+        }
+
+        return $updated;
     }
 
     public function delete(User $authUser, User $target)
     {
         $this->assertOwnerOrAdmin($authUser, $target);
 
-        return $this->userRepository->delete($target);
+        $profile = $target->profile;
+
+        $deleted = $this->userRepository->delete($target);
+
+        if ($profile !== Storage::disk('r2')->url(self::DEFAULT_PROFILE_PATH)) {
+            $this->imageUploadService->deleteFromUrl($profile);
+        }
+
+        return $deleted;
     }
 
     public function toggleVerification(User $target)
