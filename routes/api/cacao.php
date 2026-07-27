@@ -20,11 +20,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('cacao/region/alert/{date}', [CacaoController::class, 'regionAlertData']);
 
-    Route::get('cacao/upload/count/{id}', [CacaoController::class, 'getUploadCountByUser']);
-    Route::get('cacao/user/upload/{id}', [CacaoController::class, 'getCacaoUploadedByUser']);
+    Route::get('cacao/upload/count/{user:uuid}', [CacaoController::class, 'getUploadCountByUser']);
+    Route::get('cacao/user/upload/{user:uuid}', [CacaoController::class, 'getCacaoUploadedByUser']);
     Route::get('cacao/disease/weeks', [CacaoController::class, 'getHighestDiseaseWithinTheWeek']);
 
-    Route::get('cacao/{cacao}', [CacaoController::class, 'show']);
-    Route::put('cacao/{cacao}', [CacaoController::class, 'update'])->middleware('throttle:upload');
-    Route::delete('cacao/{cacao}', [CacaoController::class, 'destroy']);
+    Route::get('cacao/{cacao:uuid}', [CacaoController::class, 'show']);
+    Route::put('cacao/{cacao:uuid}', [CacaoController::class, 'update'])->middleware('throttle:upload');
+    Route::delete('cacao/{cacao:uuid}', [CacaoController::class, 'destroy']);
+    Route::delete('cacao/{cacao:uuid}/purge', [CacaoController::class, 'purge'])->withTrashed()->middleware('role:admin');
 });

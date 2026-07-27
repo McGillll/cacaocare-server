@@ -15,6 +15,8 @@ interface CacaoServiceInterface
 
     public function delete(User $authUser, Cacao $cacao);
 
+    public function purge(Cacao $cacao);
+
     public function recent();
 
     public function statusCount();

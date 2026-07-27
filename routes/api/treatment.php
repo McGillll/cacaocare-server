@@ -10,7 +10,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::middleware('role:admin')->group(function () {
         Route::post('treatment', [TreatmentController::class, 'store'])->name('treatment.store');
-        Route::put('treatment/{treatment}', [TreatmentController::class, 'update'])->name('treatment.update');
-        Route::delete('treatment/{treatment}', [TreatmentController::class, 'destroy'])->name('treatment.destroy');
+        Route::put('treatment/{treatment:uuid}', [TreatmentController::class, 'update'])->name('treatment.update');
+        Route::delete('treatment/{treatment:uuid}', [TreatmentController::class, 'destroy'])->name('treatment.destroy');
     });
 });

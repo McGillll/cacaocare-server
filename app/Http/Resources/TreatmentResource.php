@@ -10,6 +10,7 @@ class TreatmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'uuid' => $this->uuid,
             'disease' => $this->disease,
             'short_description' => $this->short_description,
             'img_url' => $this->img_url,

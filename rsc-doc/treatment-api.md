@@ -9,10 +9,14 @@ Base path: `/api`. A Treatment is a disease-treatment library entry with a neste
 | GET | `/treatment` | none (public) | List all treatments with their keypoints |
 | GET | `/treatment/{id}` | any authenticated user | Get one treatment with its keypoints |
 | POST | `/treatment` | role: admin | Create a treatment (optionally with keypoints) |
-| PUT | `/treatment/{id}` | role: admin | Update a treatment (replaces keypoints wholesale if provided) |
-| DELETE | `/treatment/{id}` | role: admin | Delete a treatment (keypoints cascade-delete via FK) |
+| PUT | `/treatment/{uuid}` | role: admin | Update a treatment (replaces keypoints wholesale if provided) |
+| DELETE | `/treatment/{uuid}` | role: admin | Delete a treatment (keypoints cascade-delete via FK) |
 
-Identifier stays integer `id` (no uuid).
+`show` and `index` still route by integer `id`. `update` and `destroy` route by `uuid` instead — a
+sequential integer in a mutating endpoint's URL is guessable/enumerable, so those two now take the
+non-sequential public identifier. This is scoped per-route (`Route::put('treatment/{treatment:uuid}', ...)`
+etc. in `routes/api/treatment.php`), not a model-wide change — `show`/`index` deliberately keep resolving
+by `id`. `treatment_key_points` has no standalone routes and was not touched.
 
 ## Who can do what
 
@@ -32,6 +36,7 @@ Identifier stays integer `id` (no uuid).
 | Field | Type |
 |---|---|
 | id | number |
+| uuid | string |
 | disease | string (unique) |
 | short_description | string \| null |
 | img_url | string \| null |
@@ -50,7 +55,7 @@ JSON body.
 | img_url | string | sometimes, url |
 | keypoints | array | sometimes — `[{ "title": string, "detailed_step": string }]` |
 
-## PUT /treatment/{id}
+## PUT /treatment/{uuid}
 
 Multipart (`POST` transport with `_method=PUT` spoofing, matching the frontend's existing FormData submission). `keypoints` may arrive either as a real array (JSON body) or as a JSON-encoded string (FormData field) — both are accepted and normalized server-side.
 

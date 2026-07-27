@@ -7,6 +7,7 @@ use App\Http\Requests\Cacao\CacaoUpdateRequest;
 use App\Http\Resources\CacaoResource;
 use App\Interfaces\Cacao\CacaoServiceInterface;
 use App\Models\Cacao;
+use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
@@ -25,9 +26,13 @@ class CacaoController
             $payload->photoFile = $request->file('photo');
         }
 
-        $cacao = $this->cacaoService->create($payload);
+        $result = $this->cacaoService->create($payload);
 
-        return $this->success(new CacaoResource($cacao), 'Cacao entry created successfully!', 201);
+        if ($result->outcome === 'restored') {
+            return $this->success(new CacaoResource($result->cacao), 'Scan restored.', 200);
+        }
+
+        return $this->success(new CacaoResource($result->cacao), 'Cacao entry created successfully!', 201);
     }
 
     public function feed(string $order, string $filter, Request $request)
@@ -69,6 +74,17 @@ class CacaoController
         $this->cacaoService->delete($request->user(), $cacao);
 
         return $this->success(null, 'Cacao entry deleted successfully.');
+    }
+
+    public function purge(Cacao $cacao)
+    {
+        $result = $this->cacaoService->purge($cacao);
+
+        $message = $result->purgedImage
+            ? 'Cacao entry and image purged.'
+            : 'Cacao entry deleted; image retained (still referenced by another entry).';
+
+        return $this->success(null, $message);
     }
 
     public function getRecent()
@@ -120,14 +136,14 @@ class CacaoController
         return $this->success($this->cacaoService->regionAlertData($year));
     }
 
-    public function getUploadCountByUser(string $id)
+    public function getUploadCountByUser(User $user)
     {
-        return $this->success($this->cacaoService->uploadCountByUser((int) $id));
+        return $this->success($this->cacaoService->uploadCountByUser($user->id));
     }
 
-    public function getCacaoUploadedByUser(string $id)
+    public function getCacaoUploadedByUser(User $user)
     {
-        $cacao = $this->cacaoService->cacaoUploadedByUser((int) $id);
+        $cacao = $this->cacaoService->cacaoUploadedByUser($user->id);
 
         return $this->success($cacao->through(fn ($c) => new CacaoResource($c)), null, 200, [
             'meta' => [

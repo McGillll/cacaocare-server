@@ -2,6 +2,7 @@
 
 namespace App\Services\Cacao;
 
+use App\Exceptions\DuplicatePhotoException;
 use App\Exceptions\UnauthorizedActionException;
 use App\Interfaces\Cacao\CacaoRepositoryInterface;
 use App\Interfaces\Cacao\CacaoServiceInterface;
@@ -41,12 +42,53 @@ class CacaoService implements CacaoServiceInterface
 
     public function create(object $payload)
     {
-        if (!empty($payload->photoFile)) {
-            $path = $this->imageUploadService->storeAsWebp($payload->photoFile, 'cacao-photos/'.$payload->label, $payload->photoFile->hashName());
-            $payload->photo = Storage::disk('r2')->url($path);
+        if (empty($payload->photoFile)) {
+            $cacao = $this->cacaoRepository->create($payload);
+
+            return (object) ['cacao' => $cacao, 'outcome' => 'created'];
         }
 
-        return $this->cacaoRepository->create($payload);
+        $hash = hash_file('sha256', $payload->photoFile->getRealPath());
+        $existing = $this->cacaoRepository->findByPhotoHash($hash, (int) $payload->uploaderId);
+
+        if ($existing) {
+            return $this->resolveDuplicateUpload($existing, $payload, $hash);
+        }
+
+        $path = $this->imageUploadService->storeAsWebp($payload->photoFile, 'cacao-photos/'.$payload->label, $payload->photoFile->hashName());
+        $payload->photo = Storage::disk('r2')->url($path);
+        $payload->photo_hash = $hash;
+
+        $cacao = $this->cacaoRepository->create($payload);
+
+        return (object) ['cacao' => $cacao, 'outcome' => 'created'];
+    }
+
+    private function resolveDuplicateUpload(Cacao $existing, object $payload, string $hash)
+    {
+        $sameUploader = (int) $existing->uploaderId === (int) $payload->uploaderId;
+        $isTrashed = !is_null($existing->deleted_at);
+
+        if ($sameUploader && !$isTrashed) {
+            throw new DuplicatePhotoException("You've already uploaded this photo.", $existing);
+        }
+
+        if ($sameUploader && $isTrashed) {
+            $restored = $this->cacaoRepository->restoreWithSubmission($existing, $payload);
+
+            return (object) ['cacao' => $restored, 'outcome' => 'restored'];
+        }
+
+        if (!$sameUploader && !$isTrashed) {
+            throw new DuplicatePhotoException('This photo has already been uploaded by another user.', $existing, true);
+        }
+
+        $payload->photo = $existing->photo;
+        $payload->photo_hash = $hash;
+
+        $cacao = $this->cacaoRepository->create($payload);
+
+        return (object) ['cacao' => $cacao, 'outcome' => 'created'];
     }
 
     public function update(User $authUser, Cacao $cacao, object $payload)
@@ -60,13 +102,20 @@ class CacaoService implements CacaoServiceInterface
     {
         $this->assertOwnerOrAdmin($authUser, $cacao);
 
-        $photo = $cacao->photo;
+        return $this->cacaoRepository->delete($cacao);
+    }
 
-        $deleted = $this->cacaoRepository->delete($cacao);
+    public function purge(Cacao $cacao)
+    {
+        $this->cacaoRepository->purge($cacao);
 
-        $this->imageUploadService->deleteFromUrl($photo);
+        if ($this->cacaoRepository->hasOtherActiveReferences($cacao)) {
+            return (object) ['purgedImage' => false];
+        }
 
-        return $deleted;
+        $this->imageUploadService->deleteFromUrl($cacao->photo);
+
+        return (object) ['purgedImage' => true];
     }
 
     public function recent()

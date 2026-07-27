@@ -1,8 +1,10 @@
 <?php
 
+use App\Exceptions\DuplicatePhotoException;
 use App\Exceptions\InvalidPayloadException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\UnauthorizedActionException;
+use App\Http\Resources\CacaoResource;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -34,6 +36,28 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (UnauthorizedActionException $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage(), 'data' => null], 403);
+        });
+
+        $exceptions->render(function (DuplicatePhotoException $e) {
+            $cacao = $e->getCacao();
+
+            if ($e->isLimited()) {
+                $data = [
+                    'cacao' => [
+                        'id' => $cacao->id,
+                        'uuid' => $cacao->uuid,
+                        'label' => $cacao->label,
+                        'confidence' => $cacao->confidence,
+                        'photo' => $cacao->photo,
+                        'uploaderId' => $cacao->uploaderId,
+                        'uploaderUsername' => optional($cacao->user)->username,
+                    ],
+                ];
+            } else {
+                $data = ['cacao' => new CacaoResource($cacao)];
+            }
+
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'data' => $data], 409);
         });
 
         $exceptions->render(function (AuthenticationException $e) {

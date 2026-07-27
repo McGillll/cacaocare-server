@@ -12,7 +12,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::middleware('role:admin')->group(function () {
         Route::post('download_link', [DownloadLinksController::class, 'store']);
-        Route::put('download_link/{download_link}', [DownloadLinksController::class, 'update']);
-        Route::delete('download_link/{download_link}', [DownloadLinksController::class, 'destroy']);
+        Route::put('download_link/{download_link:uuid}', [DownloadLinksController::class, 'update']);
+        Route::delete('download_link/{download_link:uuid}', [DownloadLinksController::class, 'destroy']);
     });
 });

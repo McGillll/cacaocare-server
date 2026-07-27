@@ -10,6 +10,7 @@ class DownloadLinkResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'uuid' => $this->uuid,
             'download_link' => $this->download_link,
             'version' => $this->version,
             'description' => $this->description,

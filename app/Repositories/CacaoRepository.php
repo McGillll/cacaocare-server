@@ -43,6 +43,7 @@ class CacaoRepository implements CacaoRepositoryInterface
         $cacao->caption = $payload->caption ?? null;
         $cacao->uploaderId = $payload->uploaderId;
         $cacao->photo = $payload->photo;
+        $cacao->photo_hash = $payload->photo_hash ?? null;
         $cacao->save();
 
         return $cacao;
@@ -67,6 +68,46 @@ class CacaoRepository implements CacaoRepositoryInterface
     public function delete(Cacao $cacao)
     {
         return $cacao->delete();
+    }
+
+    public function purge(Cacao $cacao)
+    {
+        if (is_null($cacao->deleted_at)) {
+            $cacao->delete();
+        }
+
+        return $cacao;
+    }
+
+    public function findByPhotoHash(string $photoHash, ?int $uploaderId = null)
+    {
+        $query = Cacao::withTrashed()->with('user')->where('photo_hash', $photoHash);
+
+        if (!is_null($uploaderId)) {
+            $query->orderByRaw('uploaderId = ? DESC', [$uploaderId]);
+        }
+
+        return $query->first();
+    }
+
+    public function restoreWithSubmission(Cacao $cacao, object $payload)
+    {
+        $cacao->restore();
+        $cacao->label = $payload->label;
+        $cacao->confidence = $payload->confidence;
+        $cacao->caption = $payload->caption ?? null;
+        $cacao->date_analyzed = $payload->date_analyzed;
+        $cacao->save();
+
+        return $cacao;
+    }
+
+    public function hasOtherActiveReferences(Cacao $cacao)
+    {
+        return Cacao::where('photo_hash', $cacao->photo_hash)
+            ->whereNull('deleted_at')
+            ->where('id', '!=', $cacao->id)
+            ->exists();
     }
 
     public function recent()

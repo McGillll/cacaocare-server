@@ -14,6 +14,14 @@ interface CacaoRepositoryInterface
 
     public function delete(Cacao $cacao);
 
+    public function purge(Cacao $cacao);
+
+    public function findByPhotoHash(string $photoHash, ?int $uploaderId = null);
+
+    public function restoreWithSubmission(Cacao $cacao, object $payload);
+
+    public function hasOtherActiveReferences(Cacao $cacao);
+
     public function recent();
 
     public function statusCount();

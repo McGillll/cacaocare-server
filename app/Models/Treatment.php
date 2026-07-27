@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\UsesUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Treatment extends Model
 {
     /** @use HasFactory<\Database\Factories\TreatmentFactory> */
-    use HasFactory;
-        protected $fillable = [
+    use HasFactory, UsesUuid;
+
+    protected $fillable = [
         'id',
+        'uuid',
         'disease',
         'short_description',
         'img_url',

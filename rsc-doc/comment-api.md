@@ -8,10 +8,10 @@ Base path: `/api`. Comments are scoped to a Cacao entry.
 |---|---|---|---|
 | GET | `/cacaos/{cacao}/comments` | any authenticated user | Paginated list of comments (10/page) |
 | POST | `/cacaos/{cacao}/comments` | any authenticated user | Create a comment on a cacao entry |
-| PUT | `/comments/{id}` | owner or admin | Update a comment |
-| DELETE | `/comments/{id}` | owner or admin | Delete a comment |
+| PUT | `/comments/{uuid}` | owner or admin | Update a comment |
+| DELETE | `/comments/{uuid}` | owner or admin | Delete a comment |
 
-Identifier stays integer `id` (no uuid).
+**What changed:** `comments` gained a `uuid` column (backfilled for existing rows, auto-assigned for new ones via `UsesUuid`). `PUT`/`DELETE` now bind on `uuid` instead of the internal integer `id`, matching the `Cacao`/`User` pattern. `GET /cacaos/{cacao}/comments` and the comment object's `id` field are unaffected — `id` is still returned and still used for the parent `cacao` route param.
 
 ## Who can do what
 
@@ -33,6 +33,7 @@ Identifier stays integer `id` (no uuid).
 | Field | Type |
 |---|---|
 | id | number |
+| uuid | string |
 | body | string |
 | created_at | string |
 | user | `{ id, username, profile }` |
@@ -51,7 +52,7 @@ Query param: `?page=N`.
 
 **Success** — 201, `data` = the created comment (with `user`).
 
-## PUT /comments/{id}
+## PUT /comments/{uuid}
 
 | Field | Type | Rules |
 |---|---|---|
@@ -59,7 +60,7 @@ Query param: `?page=N`.
 
 **Errors** — 403 not owner/admin; 404 not found; 422 validation failure.
 
-## DELETE /comments/{id}
+## DELETE /comments/{uuid}
 
 **Success** — 200 (previously 204 with no body) — `{ success: true, message: "...", data: null }`.
 

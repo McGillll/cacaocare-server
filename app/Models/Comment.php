@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\UsesUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    use HasFactory;
+    use HasFactory, UsesUuid;
 
-    protected $fillable = ["user_id", "cacao_id", "body"];
+    protected $fillable = ["uuid", "user_id", "cacao_id", "body"];
 
     public function user()
     {

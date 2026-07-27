@@ -20,6 +20,7 @@ class Cacao extends Model
         "label",
         "confidence",
         "photo",
+        "photo_hash",
         "uploaderId",
         "caption",
         "date_analyzed",
