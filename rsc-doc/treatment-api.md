@@ -40,7 +40,7 @@ by `id`. `treatment_key_points` has no standalone routes and was not touched.
 | disease | string (unique) |
 | short_description | string \| null |
 | img_url | string \| null |
-| keypoints | array of `{ id, disease_id, title, detailed_step }` |
+| keypoints | array of `{ id, disease_id, title, detailed_step, created_at, updated_at }` |
 | created_at | string |
 | updated_at | string |
 
